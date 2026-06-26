@@ -1,0 +1,302 @@
+NUMERA
+
+00.6 Product Constitution
+
+⸻
+
+Document ID: FOUNDATION-00.6
+
+Version: 0.1
+
+Status: 🟡 Draft
+
+Created: 2026-06-26
+
+Owner: Founding Team
+
+⸻
+
+Purpose
+
+This document defines how product decisions are made inside Numera.
+
+It is not a technical specification.
+
+It is not a business document.
+
+It is the constitution of the product.
+
+Whenever there is uncertainty, disagreement or competing priorities, this document has precedence over implementation preferences.
+
+⸻
+
+Why Numera Exists
+
+Numera exists to reduce repetitive financial work while increasing the quality of financial decisions.
+
+Automation is not the objective.
+
+Understanding is.
+
+Trust is.
+
+Better decisions are.
+
+⸻
+
+Product Identity
+
+Numera is an AI-native Financial Intelligence Platform.
+
+Numera is NOT:
+
+* an ERP
+* an accounting replacement
+* an OCR tool
+* a chatbot
+* a dashboard
+
+Numera is the intelligence layer that understands financial information and assists people in making better decisions.
+
+⸻
+
+Constitutional Principles
+
+Principle 1
+
+Understanding always comes before automation.
+
+Every automated action must be based on understanding.
+
+Never automate something that the system does not understand.
+
+⸻
+
+Principle 2
+
+Trust is more important than speed.
+
+A slower but trustworthy recommendation is preferable to a faster but unreliable automation.
+
+⸻
+
+Principle 3
+
+Explainability is mandatory.
+
+Every important recommendation must answer:
+
+Why?
+
+What information was used?
+
+How confident is Numera?
+
+What alternatives were considered?
+
+⸻
+
+Principle 4
+
+Memory is a strategic asset.
+
+Every company is unique.
+
+Numera must remember company-specific knowledge.
+
+Memory must be editable.
+
+Memory must be auditable.
+
+Memory must never become hidden behaviour.
+
+⸻
+
+Principle 5
+
+Humans remain responsible.
+
+Numera proposes.
+
+Humans approve.
+
+Responsibility never disappears.
+
+⸻
+
+Principle 6
+
+The interface must reduce cognitive load.
+
+Users should think about their business.
+
+Not about software.
+
+⸻
+
+Principle 7
+
+Every feature must justify its existence.
+
+A feature must satisfy at least one of these:
+
+* save time
+* reduce errors
+* improve decisions
+
+Otherwise it should not exist.
+
+⸻
+
+Principle 8
+
+Knowledge compounds.
+
+Every interaction should make Numera better.
+
+Corrections become memory.
+
+Memory improves reasoning.
+
+Reasoning improves decisions.
+
+⸻
+
+Principle 9
+
+AI is not the product.
+
+Understanding is the product.
+
+AI is only one component.
+
+Knowledge.
+
+Memory.
+
+Reasoning.
+
+Rules.
+
+Context.
+
+All are equally important.
+
+⸻
+
+Principle 10
+
+The company owns its knowledge.
+
+Customer knowledge belongs to the customer.
+
+Numera must never lock customers into hidden behaviour.
+
+Learning must remain transparent and exportable whenever possible.
+
+⸻
+
+Product Decision Framework
+
+Whenever a new feature is proposed the following questions must be answered.
+
+Question 1
+
+Does it help users understand their business better?
+
+⸻
+
+Question 2
+
+Does it save measurable time?
+
+⸻
+
+Question 3
+
+Does it reduce mistakes?
+
+⸻
+
+Question 4
+
+Does it increase trust?
+
+⸻
+
+Question 5
+
+Does it increase unnecessary complexity?
+
+If complexity increases more than value, reject the feature.
+
+⸻
+
+Product Philosophy
+
+Numera will never compete by having more buttons.
+
+Numera will compete by requiring fewer clicks and better decisions.
+
+Simplicity is not the absence of functionality.
+
+Simplicity is the consequence of excellent design.
+
+⸻
+
+Product Culture
+
+Inside Numera every engineer is expected to ask:
+
+Should we build this?
+
+before asking
+
+Can we build this?
+
+The first question is more important.
+
+⸻
+
+Long-Term Commitment
+
+Every architectural decision should still make sense ten years from now.
+
+Short-term convenience must never destroy long-term quality.
+
+⸻
+
+Definition of Success
+
+Success is not measured by:
+
+* lines of code
+* number of features
+* number of screens
+
+Success is measured by:
+
+* hours saved
+* trust gained
+* better financial decisions
+* customer satisfaction
+
+⸻
+
+Final Commitment
+
+Numera will always prioritise:
+
+Understanding over automation.
+
+Trust over speed.
+
+Knowledge over data.
+
+Memory over configuration.
+
+People over software.
+
+Long-term quality over short-term convenience.
+
+This constitution defines the principles every future product decision must respect.
