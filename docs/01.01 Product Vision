@@ -1,0 +1,253 @@
+NUMERA
+
+01.01 Product Vision
+
+⸻
+
+Document ID: PRD-01.01
+
+Version: 0.1
+
+Status: 🟡 Draft
+
+Created: 2026-06-26
+
+Owner: Founding Team
+
+Related Documents
+
+* 00 Vision & Philosophy
+* 00.5 Numera Core
+* Product Constitution
+* Product Principles
+
+⸻
+
+Purpose
+
+This document defines the vision of Numera as a product.
+
+It explains what Numera is, why it exists, who it is built for and how it will evolve.
+
+This document intentionally avoids implementation details.
+
+Its purpose is to align product, engineering, design and business around a common objective.
+
+⸻
+
+Product Statement
+
+Numera is an AI-native financial intelligence platform that understands business information before automating financial processes.
+
+Unlike traditional ERP systems, Numera is not designed to replace existing accounting software.
+
+Instead, it acts as an intelligent layer capable of understanding documents, remembering company knowledge, reasoning about financial events and assisting professionals in making better decisions.
+
+Numera transforms financial data into actionable knowledge.
+
+⸻
+
+Mission
+
+To become the most trusted financial intelligence platform for companies.
+
+Numera exists to eliminate repetitive financial work while increasing decision quality.
+
+Automation is not the objective.
+
+Better decisions are.
+
+⸻
+
+Vision
+
+We believe every company should have an intelligent financial assistant working continuously.
+
+An assistant capable of:
+
+* understanding financial documents
+* remembering company knowledge
+* detecting anomalies
+* proposing accounting decisions
+* anticipating financial risks
+* helping professionals make better decisions
+
+Numera will not replace finance professionals.
+
+It will multiply their capabilities.
+
+⸻
+
+Product Philosophy
+
+Numera is designed around one internal principle.
+
+Understand before automating.
+
+Every automation must be preceded by understanding.
+
+Every decision must be explainable.
+
+Every action must be traceable.
+
+Every improvement must come from learning.
+
+⸻
+
+External Promise
+
+Our external promise is simple.
+
+Turn data into decisions.
+
+Customers do not buy OCR.
+
+Customers do not buy Artificial Intelligence.
+
+Customers buy clarity.
+
+Customers buy confidence.
+
+Customers buy time.
+
+⸻
+
+Target Customers
+
+Primary customers
+
+* Accounting firms
+* SMEs
+* Finance departments
+* Companies processing high volumes of documents
+
+Secondary customers
+
+* Enterprise finance teams
+* Shared service centers
+* Auditors
+
+Future markets
+
+* International accounting firms
+* Financial institutions
+* ERP vendors
+
+⸻
+
+Problems We Solve
+
+Companies spend thousands of hours every year:
+
+* reading invoices
+* entering data
+* reconciling transactions
+* searching for documents
+* correcting repetitive errors
+* answering financial questions
+
+Most of these tasks generate little business value.
+
+Numera removes repetitive work while preserving human control.
+
+⸻
+
+Value Proposition
+
+Numera provides:
+
+* Faster financial operations
+* Fewer manual errors
+* Better financial visibility
+* Continuous learning
+* Explainable AI
+* Company-specific memory
+* Natural interaction with financial information
+
+⸻
+
+Product Differentiators
+
+Numera remembers.
+
+Numera explains.
+
+Numera learns.
+
+Numera reasons.
+
+Numera understands.
+
+Numera collaborates.
+
+Numera integrates.
+
+Numera does not require replacing existing ERPs.
+
+⸻
+
+Success Definition
+
+Numera succeeds when finance professionals stop spending time introducing data and start spending time understanding their business.
+
+Success will be measured by:
+
+* hours saved
+* reduction in manual work
+* reduction in accounting errors
+* faster financial closing
+* customer satisfaction
+* adoption rate
+* trust in AI recommendations
+
+⸻
+
+Long-term Vision
+
+Within ten years Numera should become the financial operating system for businesses.
+
+Accounting will only be one capability.
+
+The platform will also understand purchasing, treasury, tax, banking, forecasting, risk, financial strategy and business intelligence.
+
+Every capability will share the same knowledge model.
+
+⸻
+
+Design Principles
+
+Every feature must satisfy at least one of these conditions:
+
+* Save time.
+* Reduce errors.
+* Improve decisions.
+
+If a feature satisfies none of them, it should not be part of Numera.
+
+⸻
+
+Product Principles
+
+Human supervision remains essential.
+
+Trust is more valuable than automation.
+
+Memory is a strategic advantage.
+
+Knowledge compounds over time.
+
+Understanding precedes execution.
+
+Every decision must be explainable.
+
+Every important action must be reversible.
+
+⸻
+
+Closing Statement
+
+Numera is not another accounting platform.
+
+Numera is the intelligence layer that transforms financial information into business decisions.
+
+This document defines the product vision that every future decision must respect.
