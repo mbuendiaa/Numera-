@@ -1,0 +1,444 @@
+NUMERA
+
+AI-01 Cognitive Operating Model
+
+⸻
+
+Document ID: AI-01
+
+Version: 0.1
+
+Status: Draft
+
+Created: 2026-06-29
+
+Owner: Founding Team
+
+⸻
+
+Purpose
+
+This document defines the cognitive operating model of Numera.
+
+Rather than describing software components, this document explains how Numera transforms information into decisions.
+
+Every AI capability, backend service, workflow and user interaction must align with this model.
+
+This document is the conceptual foundation of the Numera Brain.
+
+⸻
+
+Core Philosophy
+
+Numera does not automate because it can.
+
+Numera automates because it understands.
+
+Automation is the consequence of understanding.
+
+Not the objective.
+
+⸻
+
+Cognitive Mission
+
+Numera exists to continuously transform business information into trusted financial decisions.
+
+To achieve this, Numera must:
+
+* perceive information;
+* understand meaning;
+* connect knowledge;
+* remember experience;
+* reason using context;
+* evaluate confidence;
+* plan actions;
+* execute safely;
+* reflect on outcomes;
+* improve continuously.
+
+⸻
+
+The Cognitive Loop
+
+Every interaction follows the same reasoning cycle.
+
+Perception
+      ↓
+Understanding
+      ↓
+Knowledge
+      ↓
+Memory
+      ↓
+Context
+      ↓
+Reasoning
+      ↓
+Planning
+      ↓
+Confidence
+      ↓
+Execution
+      ↓
+Reflection
+      ↓
+Learning
+
+This loop is the permanent operating cycle of Numera.
+
+No important action should bypass it.
+
+⸻
+
+Cognitive Layers
+
+Numera is organised into six cognitive layers.
+
+Layer 1 — Perception
+
+Responsible for receiving information.
+
+Inputs may include:
+
+* PDF invoices;
+* XML invoices;
+* emails;
+* scanned documents;
+* bank transactions;
+* ERP events;
+* spreadsheets;
+* user conversations;
+* APIs.
+
+The objective is not extraction.
+
+The objective is perception.
+
+⸻
+
+Layer 2 — Understanding
+
+Transforms raw information into business meaning.
+
+Examples:
+
+“This is a supplier invoice.”
+
+“This document is incomplete.”
+
+“This bank movement belongs to Invoice 542.”
+
+Understanding answers:
+
+“What happened?”
+
+⸻
+
+Layer 3 — Knowledge
+
+Knowledge represents what Numera already knows.
+
+Knowledge includes:
+
+* accounting principles;
+* tax rules;
+* company structure;
+* suppliers;
+* customers;
+* products;
+* historical behaviour;
+* regulations;
+* relationships.
+
+Knowledge is relatively stable.
+
+⸻
+
+Layer 4 — Memory
+
+Memory stores experience.
+
+Knowledge answers:
+
+“What is generally true?”
+
+Memory answers:
+
+“What happened in this company?”
+
+Examples:
+
+* Supplier usually invoices monthly.
+* Manager prefers manual approval above €3,000.
+* This customer always pays late.
+* Previous invoice contained an error.
+
+Memory is company-specific.
+
+⸻
+
+Layer 5 — Context
+
+Context represents the current situation.
+
+Context includes:
+
+* current date;
+* accounting period;
+* fiscal deadlines;
+* user role;
+* workflow stage;
+* active company;
+* recent events;
+* temporary business conditions.
+
+Context changes interpretation.
+
+The same invoice may require different actions depending on context.
+
+⸻
+
+Layer 6 — Decision
+
+Decision combines:
+
+* understanding;
+* knowledge;
+* memory;
+* context.
+
+Decision itself contains four engines:
+
+* Reasoning;
+* Planning;
+* Confidence;
+* Execution.
+
+Reflection and Learning complete the cycle.
+
+⸻
+
+Cognitive Engines
+
+The Numera Brain is composed of specialised engines.
+
+Understanding Engine
+
+Creates semantic meaning from incoming information.
+
+⸻
+
+Knowledge Engine
+
+Queries enterprise knowledge.
+
+⸻
+
+Memory Engine
+
+Retrieves company experience.
+
+Creates new memories.
+
+Updates existing memories.
+
+⸻
+
+Context Engine
+
+Determines the active business context.
+
+⸻
+
+Reasoning Engine
+
+Generates possible interpretations.
+
+Evaluates alternatives.
+
+Produces candidate decisions.
+
+⸻
+
+Planning Engine
+
+Selects the safest sequence of actions.
+
+⸻
+
+Confidence Engine
+
+Measures confidence.
+
+Explains uncertainty.
+
+Determines whether human approval is required.
+
+⸻
+
+Execution Engine
+
+Executes approved actions.
+
+Never executes irreversible actions without respecting company policy.
+
+⸻
+
+Reflection Engine
+
+Observes outcomes.
+
+Detects corrections.
+
+Measures decision quality.
+
+⸻
+
+Learning Engine
+
+Transforms successful interactions into reusable knowledge.
+
+⸻
+
+Human Collaboration
+
+Humans remain central to the system.
+
+Numera is designed to amplify professional judgement.
+
+Not replace it.
+
+The ideal interaction is:
+
+AI prepares.
+
+Human validates.
+
+AI learns.
+
+Human supervises.
+
+⸻
+
+Decision States
+
+Every decision belongs to one of four states.
+
+Known
+
+Numera has high confidence.
+
+⸻
+
+Probable
+
+Evidence is strong but not absolute.
+
+⸻
+
+Uncertain
+
+Additional information is required.
+
+⸻
+
+Unknown
+
+No safe recommendation exists.
+
+Unknown should trigger questions.
+
+Never assumptions.
+
+⸻
+
+Cognitive Safety
+
+The brain must always prefer safe behaviour.
+
+Examples:
+
+Ask instead of guessing.
+
+Delay instead of risking.
+
+Explain instead of hiding.
+
+Recommend instead of forcing.
+
+Human trust has higher priority than automation rate.
+
+⸻
+
+Continuous Improvement
+
+Every interaction modifies the cognitive system.
+
+Accepted recommendations strengthen confidence.
+
+Corrections create memories.
+
+Repeated behaviour creates patterns.
+
+Patterns improve future reasoning.
+
+Learning is continuous but governed.
+
+Nothing is learned without traceability.
+
+⸻
+
+Cognitive Independence
+
+The operating model is independent of:
+
+* LLM provider;
+* OCR engine;
+* database technology;
+* ERP integration;
+* programming language.
+
+Technology may change.
+
+The cognitive model should remain stable.
+
+⸻
+
+Success Criteria
+
+The cognitive model succeeds when:
+
+* decisions become more accurate over time;
+* explanations become clearer;
+* manual work decreases;
+* user trust increases;
+* company knowledge compounds.
+
+Success is measured by the quality of reasoning, not by the number of automated actions.
+
+⸻
+
+Closing Statement
+
+Numera is not an artificial intelligence that processes documents.
+
+Numera is a cognitive financial system.
+
+It perceives.
+
+It understands.
+
+It remembers.
+
+It reasons.
+
+It plans.
+
+It executes safely.
+
+It reflects.
+
+It learns.
+
+Every capability of Numera must emerge from this operating model.
