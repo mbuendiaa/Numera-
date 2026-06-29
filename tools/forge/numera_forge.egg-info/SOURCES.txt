@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+forge/__init__.py
+forge/cli.py
+forge/commands/__init__.py
+forge/commands/docs.py
+forge/core/__init__.py
+forge/core/paths.py
+numera_forge.egg-info/PKG-INFO
+numera_forge.egg-info/SOURCES.txt
+numera_forge.egg-info/dependency_links.txt
+numera_forge.egg-info/entry_points.txt
+numera_forge.egg-info/requires.txt
+numera_forge.egg-info/top_level.txt

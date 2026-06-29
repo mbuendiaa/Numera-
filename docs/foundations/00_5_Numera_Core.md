@@ -1,12 +1,17 @@
 # NUMERA
 
-## Documento 00.5 — Numera Core
+**Documento 00.5 — Numera Core
 
-**Versión:** 0.1  
-**Estado:** Draft  
-**Fecha:** 26 de junio de 2026  
-**Documento relacionado:** 00_Vision_and_Philosophy.md  
 
+**Document ID:** FOUNDATION-00.5
+
+**Version:** 0.1
+
+**Status:** Draft
+
+**Created:** 2026-06-26
+
+**Owner:** Founding Team
 ---
 
 # 1. Propósito del documento
