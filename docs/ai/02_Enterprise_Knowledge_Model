@@ -1,0 +1,376 @@
+NUMERA
+
+02 Enterprise Knowledge Model
+
+⸻
+
+Document ID: AI-02
+
+Version: 0.1
+
+Status: Draft
+
+Created: 2026-06-29
+
+Owner: Founding Team
+
+⸻
+
+Purpose
+
+This document defines how Numera understands a company.
+
+For traditional ERP systems, a company is a database.
+
+For Numera, a company is a living knowledge system.
+
+Everything that happens inside the company creates context.
+
+Everything creates relationships.
+
+Everything creates knowledge.
+
+The objective of this model is to represent those relationships instead of storing isolated data.
+
+⸻
+
+Core Principle
+
+Numera does not store documents.
+
+Numera understands business events.
+
+Every document represents something that happened.
+
+Invoices represent purchases.
+
+Bank movements represent cash flow.
+
+Contracts represent commitments.
+
+Emails represent communication.
+
+The document itself is secondary.
+
+The event is primary.
+
+⸻
+
+The Company as a Living System
+
+Numera models a company as an interconnected ecosystem.
+
+The ecosystem is composed of:
+
+* People
+* Organisations
+* Processes
+* Financial Events
+* Documents
+* Assets
+* Products
+* Services
+* Obligations
+* Decisions
+* Rules
+* Memories
+* Relationships
+
+Each element influences the others.
+
+⸻
+
+The Enterprise Graph
+
+Instead of isolated tables, Numera builds a graph of relationships.
+
+Example:
+
+Company
+
+↓
+
+Supplier
+
+↓
+
+Invoice
+
+↓
+
+Purchase
+
+↓
+
+Accounting Entry
+
+↓
+
+Payment
+
+↓
+
+Bank Movement
+
+↓
+
+Cash Position
+
+↓
+
+Financial Report
+
+The graph represents meaning, not only storage.
+
+⸻
+
+Entity Categories
+
+The first version of Numera recognises the following entity groups.
+
+Human Entities
+
+* Employee
+* Accountant
+* Manager
+* Customer
+* Supplier Contact
+
+⸻
+
+Business Entities
+
+* Company
+* Supplier
+* Customer
+* Bank
+* Tax Authority
+
+⸻
+
+Financial Entities
+
+* Invoice
+* Credit Note
+* Debit Note
+* Journal Entry
+* Payment
+* Receipt
+* Tax Declaration
+
+⸻
+
+Operational Entities
+
+* Order
+* Delivery Note
+* Contract
+* Subscription
+* Inventory Item
+
+⸻
+
+Knowledge Entities
+
+* Memory
+* Rule
+* Recommendation
+* Decision
+* Alert
+* Risk
+* Exception
+
+⸻
+
+Relationships
+
+Relationships are first-class objects.
+
+Examples:
+
+Supplier
+
+→ sends
+
+Invoice
+
+Invoice
+
+→ generates
+
+Accounting Entry
+
+Accounting Entry
+
+→ affects
+
+Account
+
+Account
+
+→ belongs to
+
+Financial Statement
+
+Memory
+
+→ influences
+
+Reasoning
+
+Rule
+
+→ validates
+
+Invoice
+
+Risk
+
+→ blocks
+
+Execution
+
+Relationships are more valuable than isolated records.
+
+⸻
+
+Context
+
+Every event is interpreted within context.
+
+Context includes:
+
+* company
+* user
+* date
+* accounting period
+* fiscal calendar
+* historical behaviour
+* current workflow
+* previous interactions
+
+Context changes interpretation.
+
+The same invoice may produce different actions depending on context.
+
+⸻
+
+Business Events
+
+Numera represents the company as a continuous sequence of business events.
+
+Examples:
+
+Invoice received.
+
+Payment executed.
+
+Supplier created.
+
+Price increased.
+
+Tax filed.
+
+Contract signed.
+
+User correction accepted.
+
+Every event becomes knowledge.
+
+⸻
+
+Company Memory
+
+Company memory is independent from documents.
+
+Examples:
+
+Supplier always invoices on Fridays.
+
+This supplier often sends duplicates.
+
+Manager prefers manual approval above €5,000.
+
+Fuel invoices use account 629300.
+
+These are memories.
+
+Not invoices.
+
+⸻
+
+Dynamic Knowledge
+
+Knowledge evolves.
+
+The graph must allow:
+
+* adding new relationships;
+* removing obsolete relationships;
+* strengthening trusted relationships;
+* weakening outdated knowledge.
+
+Knowledge is dynamic.
+
+⸻
+
+Time
+
+Everything in Numera exists in time.
+
+Every entity should know:
+
+* when it was created;
+* when it changed;
+* when it became obsolete;
+* what replaced it.
+
+Time is fundamental for reasoning.
+
+⸻
+
+Trust
+
+Every relationship carries confidence.
+
+Example:
+
+Supplier → Account 628
+
+Confidence: 99%
+
+Supplier → Account 629
+
+Confidence: 41%
+
+Relationships are probabilistic.
+
+Not absolute.
+
+⸻
+
+Knowledge Ownership
+
+Every company owns its graph.
+
+Graphs must remain isolated.
+
+No company may access another company’s knowledge.
+
+Learning is company-specific unless explicitly designed otherwise.
+
+⸻
+
+Closing Statement
+
+Numera does not understand companies through spreadsheets or accounting tables.
+
+Numera understands companies through relationships.
+
+Every document is an event.
+
+Every event creates knowledge.
+
+Every piece of knowledge changes future decisions.
+
+The Enterprise Knowledge Model defines the conceptual world in which the Numera Brain operates.
