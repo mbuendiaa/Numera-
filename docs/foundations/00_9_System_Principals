@@ -1,0 +1,337 @@
+NUMERA
+
+00.9 System Principles
+
+⸻
+
+Document ID: FOUNDATION-00.9
+Version: 0.1
+Status: Draft
+Created: 2026-06-29
+Owner: Founding Team
+
+⸻
+
+1. Purpose
+
+This document defines the permanent system principles of Numera.
+
+These principles must guide every future decision in product, architecture, AI, data, integrations, security and user experience.
+
+The objective is to prevent Numera from becoming complex, inconsistent or opaque as it grows.
+
+⸻
+
+2. Core System Belief
+
+Numera must remain simple for the user, even if the internal system becomes complex.
+
+The user should never feel the complexity of OCR, AI models, accounting rules, integrations, memory, permissions or data pipelines.
+
+Complexity belongs inside the system.
+
+Clarity belongs in the interface.
+
+⸻
+
+3. Principle 1 — Understand Before Automating
+
+Numera must never automate a process it does not understand.
+
+Before acting, Numera must know:
+
+* what information it has;
+* what information is missing;
+* what confidence level exists;
+* what risk exists;
+* whether human approval is required.
+
+Automation without understanding is not allowed.
+
+⸻
+
+4. Principle 2 — One Source of Truth
+
+Every relevant piece of information must have one authoritative source.
+
+Duplicated data creates inconsistency.
+
+When data appears in multiple places, Numera must know which source is authoritative.
+
+Examples:
+
+* invoice data;
+* supplier records;
+* accounting entries;
+* memories;
+* rules;
+* user permissions;
+* company configuration.
+
+⸻
+
+5. Principle 3 — Explain Every Important Decision
+
+Every important recommendation or action must be explainable.
+
+Numera must be able to answer:
+
+* why this decision was proposed;
+* what data was used;
+* what rules were applied;
+* what memory influenced the result;
+* what confidence level exists;
+* what alternatives were considered.
+
+A decision that cannot be explained should not be automated.
+
+⸻
+
+6. Principle 4 — Memory Must Be Visible and Editable
+
+Memory is a strategic advantage, but hidden memory is dangerous.
+
+Every relevant memory must be:
+
+* visible;
+* traceable;
+* editable;
+* reversible;
+* auditable.
+
+The user must be able to understand what Numera remembers and why.
+
+⸻
+
+7. Principle 5 — Ask Before Assuming
+
+When confidence is low or risk is meaningful, Numera must ask.
+
+Guessing is not intelligence.
+
+The system should prefer a short question over a silent incorrect action.
+
+⸻
+
+8. Principle 6 — Rules and AI Must Be Separated
+
+Business rules must not be buried inside AI prompts or model behaviour.
+
+Rules must be explicit, testable and versioned.
+
+AI may interpret context, but rules define boundaries.
+
+This separation allows Numera to remain reliable even when AI models change.
+
+⸻
+
+9. Principle 7 — Integrations Must Be Replaceable
+
+Numera must not depend permanently on a single ERP, OCR provider, LLM provider, database vendor or cloud provider.
+
+External systems must be connected through replaceable interfaces.
+
+This makes Numera resilient and future-proof.
+
+⸻
+
+10. Principle 8 — The LLM Is Not the Brain
+
+The brain of Numera is not a language model.
+
+The brain is the decision system composed of:
+
+* Memory Engine;
+* Knowledge Graph;
+* Rule Engine;
+* Confidence Engine;
+* AI Orchestrator;
+* Action Planner;
+* Reflection Engine.
+
+The LLM is one tool used by the system, not the system itself.
+
+⸻
+
+11. Principle 9 — Human Approval for High-Risk Actions
+
+Any action with fiscal, legal, accounting, banking or irreversible impact must require explicit human approval.
+
+Numera may prepare.
+
+Numera may recommend.
+
+Numera may explain.
+
+But the user approves high-risk execution.
+
+⸻
+
+12. Principle 10 — Every Action Must Leave a Trace
+
+Every relevant action must be logged.
+
+The system must record:
+
+* who initiated the action;
+* when it happened;
+* what data was used;
+* what rule or model was involved;
+* what confidence level existed;
+* whether the action was approved, rejected or corrected.
+
+Traceability is part of the product.
+
+⸻
+
+13. Principle 11 — The User Should Not Repeat Work
+
+If the user has already corrected, approved or configured something, Numera should remember it when appropriate.
+
+Repeated manual work is a product failure.
+
+The system should learn from approved user behaviour.
+
+⸻
+
+14. Principle 12 — Simplicity Beats Feature Count
+
+Numera will not compete by having more screens or buttons.
+
+Numera will compete by reducing the number of actions needed to complete financial work.
+
+A feature that increases complexity without clear value must be rejected.
+
+⸻
+
+15. Principle 13 — Data Belongs to the Company
+
+Company knowledge belongs to the company.
+
+Numera must not treat customer data, memories or rules as proprietary black-box behaviour.
+
+Where possible, company knowledge should be exportable, reviewable and portable.
+
+⸻
+
+16. Principle 14 — Confidence Must Be Explicit
+
+Numera must show confidence levels where they affect user trust or risk.
+
+The system must distinguish between:
+
+* known;
+* inferred;
+* uncertain;
+* missing;
+* conflicting.
+
+This prevents false certainty.
+
+⸻
+
+17. Principle 15 — Reflection Is Required for Learning
+
+Numera must not only act.
+
+It must evaluate whether its action was useful.
+
+Every accepted, corrected or rejected recommendation should inform future behaviour.
+
+Reflection converts usage into learning.
+
+⸻
+
+18. Principle 16 — The Interface Is an Intelligence Layer
+
+The interface should not merely display data.
+
+It should explain what deserves attention.
+
+Numera should not show a dashboard full of numbers when it can say:
+
+“These three issues require review today.”
+
+Home Intelligence is preferred over static dashboards.
+
+⸻
+
+19. Principle 17 — Conversation Is Navigation
+
+Users should be able to access information by asking natural questions.
+
+Search, filters and tables remain useful, but conversation should become the primary way to explore company knowledge.
+
+Examples:
+
+* “Show me all Vodafone invoices from last year.”
+* “Which suppliers increased prices this quarter?”
+* “What should I review before closing the month?”
+
+⸻
+
+20. Principle 18 — Internal Complexity Must Be Modular
+
+As Numera grows, complexity must be isolated into modules.
+
+No module should become a hidden dependency for the entire platform.
+
+Core modules must communicate through clear interfaces.
+
+⸻
+
+21. Principle 19 — Quality Over Speed
+
+Fast development is valuable only if it does not create future fragility.
+
+Numera must avoid short-term decisions that make the product harder to understand, test or evolve.
+
+⸻
+
+22. Principle 20 — Every System Decision Must Survive Scale
+
+A decision that works for one company but breaks for one thousand companies is not a good system decision.
+
+Numera must be designed for:
+
+* multi-company;
+* multi-user;
+* multi-role;
+* multi-integration;
+* multi-country future expansion.
+
+⸻
+
+23. Enforcement
+
+These principles must be applied during:
+
+* product design;
+* architecture reviews;
+* AI design;
+* database modelling;
+* UX design;
+* API design;
+* code review;
+* security review;
+* roadmap prioritisation.
+
+If a proposed decision violates these principles, it must be rejected or formally justified in a Decision Log entry.
+
+⸻
+
+24. Closing Statement
+
+Numera must remain intelligent, trustworthy and simple as it grows.
+
+The purpose of these principles is to protect the product from becoming another complex financial system.
+
+Numera should feel like a financial assistant.
+
+Not like an ERP.
+
+Not like a database.
+
+Not like a collection of features.
+
+A system that understands, remembers, explains and helps people decide.
