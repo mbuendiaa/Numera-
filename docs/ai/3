@@ -1,1 +1,390 @@
-hol 
+NUMERA
+
+AI-03 Memory Engine
+
+⸻
+
+Document ID: AI-03
+
+Version: 0.1
+
+Status: Draft
+
+Created: 2026-06-29
+
+Owner: Founding Team
+
+⸻
+
+Purpose
+
+The Memory Engine is responsible for preserving, organising and retrieving company-specific knowledge.
+
+Unlike traditional software, Numera does not process each document independently.
+
+Every interaction contributes to a growing understanding of the company.
+
+Memory is one of Numera’s core strategic assets.
+
+⸻
+
+Philosophy
+
+Knowledge answers:
+
+“What is generally true?”
+
+Memory answers:
+
+“What has happened inside this company?”
+
+Every company develops habits, preferences, exceptions and operational knowledge.
+
+The purpose of the Memory Engine is to preserve that knowledge.
+
+⸻
+
+Objectives
+
+The Memory Engine must:
+
+* remember relevant business information;
+* improve future decisions;
+* reduce repetitive work;
+* preserve historical context;
+* remain fully auditable;
+* remain editable by authorised users.
+
+⸻
+
+Memory Lifecycle
+
+Every memory follows the same lifecycle.
+
+Observation
+↓
+Candidate Memory
+↓
+Validation
+↓
+Active Memory
+↓
+Reinforcement
+↓
+Decay
+↓
+Archive
+↓
+Deletion (optional)
+
+Nothing becomes permanent immediately.
+
+⸻
+
+Memory Categories
+
+Supplier Memory
+
+Examples:
+
+Supplier invoices monthly.
+
+Supplier usually applies 21% VAT.
+
+Supplier invoices are normally booked to account 628000.
+
+Supplier has previously sent duplicate invoices.
+
+⸻
+
+Customer Memory
+
+Examples:
+
+Customer pays late.
+
+Customer always requests PDF invoices.
+
+Customer normally disputes transport costs.
+
+⸻
+
+Accounting Memory
+
+Examples:
+
+Fuel expenses use account 629300.
+
+Travel expenses require cost centre allocation.
+
+Subscriptions are accrued monthly.
+
+⸻
+
+Fiscal Memory
+
+Examples:
+
+Reduced VAT applies.
+
+Intracommunity transaction.
+
+Reverse charge applicable.
+
+⸻
+
+User Memory
+
+Examples:
+
+Finance Manager reviews invoices above €5,000.
+
+Controller prefers manual validation for new suppliers.
+
+⸻
+
+Company Memory
+
+Examples:
+
+Month-end closing starts on day 25.
+
+Payroll is processed on the last working day.
+
+Bank reconciliation occurs every Friday.
+
+⸻
+
+Incident Memory
+
+Examples:
+
+Supplier generated duplicate invoices in 2025.
+
+Bank integration failed during migration.
+
+Tax adjustment required manual correction.
+
+⸻
+
+Instruction Memory
+
+Created explicitly by users.
+
+Examples:
+
+“Always review invoices from Supplier X.”
+
+“Never auto-post invoices above €10,000.”
+
+These memories always have priority.
+
+⸻
+
+Memory Attributes
+
+Every memory contains:
+
+* Memory ID
+* Category
+* Description
+* Company
+* Related entities
+* Created date
+* Created by
+* Confidence
+* Source
+* Status
+* Expiration policy
+* Last used
+* Last updated
+* Importance
+* Tags
+
+⸻
+
+Confidence
+
+Every memory has its own confidence.
+
+Example:
+
+Supplier → Account 628000
+
+Confidence: 98%
+
+Evidence:
+
+52 accepted invoices
+
+Last confirmation:
+
+2 days ago
+
+Confidence changes over time.
+
+⸻
+
+Reinforcement
+
+Every successful reuse increases confidence.
+
+Repeated confirmation strengthens memory.
+
+Repeated correction weakens memory.
+
+Learning is gradual.
+
+⸻
+
+Memory Decay
+
+Not every memory remains valid forever.
+
+Unused memories lose confidence progressively.
+
+Possible reasons:
+
+* supplier changed behaviour;
+* accounting policy changed;
+* regulation changed;
+* company process changed.
+
+Old memories should not dominate current decisions.
+
+⸻
+
+Memory Sources
+
+Memories may originate from:
+
+* explicit user instruction;
+* repeated user approval;
+* repeated corrections;
+* business rules;
+* imported ERP history;
+* accounting policies;
+* administrator configuration.
+
+The origin is always recorded.
+
+⸻
+
+Memory Retrieval
+
+The Memory Engine retrieves memories according to:
+
+* relevance;
+* confidence;
+* recency;
+* context;
+* entity relationships.
+
+Not all memories are equally important.
+
+⸻
+
+Conflict Resolution
+
+Conflicting memories may exist.
+
+Example:
+
+Old rule:
+
+Supplier → Account 628000
+
+New behaviour:
+
+Supplier → Account 629000
+
+Numera must:
+
+* detect conflict;
+* lower confidence;
+* explain the situation;
+* request confirmation if necessary.
+
+Hidden conflicts are unacceptable.
+
+⸻
+
+Explainability
+
+Whenever memory influences a recommendation, Numera must explain it.
+
+Example:
+
+“I proposed account 628000 because:
+
+• 48 previous invoices were booked there.
+
+• No corrections were made during the last 18 months.
+
+• The Finance Manager approved this classification repeatedly.”
+
+⸻
+
+Editing Memory
+
+Authorised users may:
+
+* create memories;
+* edit memories;
+* deactivate memories;
+* archive memories;
+* merge duplicate memories;
+* restore archived memories.
+
+Nothing should become immutable.
+
+⸻
+
+Security
+
+Memory is company-specific.
+
+No memory should leak between companies.
+
+Access depends on user permissions.
+
+Sensitive memories must be encrypted where appropriate.
+
+⸻
+
+Future Evolution
+
+Future versions may include:
+
+* predictive memories;
+* temporal memories;
+* seasonal memories;
+* collaborative memories;
+* workflow memories;
+* cross-document reasoning memories.
+
+⸻
+
+Success Criteria
+
+The Memory Engine succeeds when:
+
+* repetitive corrections decrease;
+* recommendation quality improves;
+* confidence becomes more accurate;
+* company knowledge accumulates safely;
+* users trust remembered behaviour.
+
+⸻
+
+Closing Statement
+
+The Memory Engine transforms isolated interactions into organisational knowledge.
+
+Every validated experience becomes part of the company’s intelligence.
+
+Memory allows Numera to improve continuously without forcing users to repeat the same decisions.
+
+Knowledge makes Numera intelligent.
+
+Memory makes Numera unique.
