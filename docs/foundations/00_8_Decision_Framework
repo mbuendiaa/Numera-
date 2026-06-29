@@ -1,0 +1,296 @@
+NUMERA
+
+00.8 Decision Framework
+
+⸻
+
+Document ID: FOUNDATION-00.8
+
+Version: 0.1
+
+Status: Draft
+
+Created: 2026-06-29
+
+Owner: Founding Team
+
+⸻
+
+Purpose
+
+This document defines how decisions are made inside Numera.
+
+It provides a common framework for evaluating product features, AI capabilities, architecture, integrations and business priorities.
+
+The objective is to avoid subjective decisions and maintain long-term consistency.
+
+⸻
+
+Core Philosophy
+
+Every decision should improve the product without increasing unnecessary complexity.
+
+A feature is valuable only if it creates measurable value for users.
+
+Numera will optimise for long-term quality rather than short-term convenience.
+
+⸻
+
+Decision Hierarchy
+
+Whenever two decisions conflict, the following order of priority applies:
+
+1. Product Constitution
+2. System Principles
+3. User Value
+4. Security
+5. Explainability
+6. Scalability
+7. Performance
+8. Development Speed
+
+Speed is important.
+
+Correctness is more important.
+
+⸻
+
+The Five Decision Questions
+
+Before accepting any feature, architecture change or AI capability, the following questions must be answered.
+
+Question 1 — Does it solve a real problem?
+
+Every feature must address an identified customer problem.
+
+No feature exists because it is technically interesting.
+
+⸻
+
+Question 2 — Is the value measurable?
+
+The expected benefit should be measurable.
+
+Examples:
+
+* hours saved;
+* errors reduced;
+* faster financial closing;
+* fewer user actions;
+* better recommendations.
+
+⸻
+
+Question 3 — Does it increase trust?
+
+Features that reduce transparency or make the system harder to understand should normally be rejected.
+
+Trust is one of Numera’s core assets.
+
+⸻
+
+Question 4 — What complexity does it introduce?
+
+Every feature has a cost.
+
+The following types of complexity must be evaluated:
+
+* product complexity;
+* technical complexity;
+* operational complexity;
+* cognitive complexity for users.
+
+If complexity grows faster than value, the feature should not be implemented.
+
+⸻
+
+Question 5 — Will this decision still make sense in five years?
+
+Numera should avoid decisions that optimise only for short-term convenience.
+
+Long-term maintainability has priority.
+
+⸻
+
+Decision Matrix
+
+Every proposal receives a score from 1 to 5.
+
+Criterion	Score
+User value	
+Time saved	
+Error reduction	
+Trust	
+Strategic importance	
+Development effort	
+Maintenance cost	
+Risk	
+
+The matrix does not replace judgement.
+
+It supports consistent discussions.
+
+⸻
+
+Feature Acceptance Criteria
+
+A feature should normally satisfy at least two of the following:
+
+* saves measurable time;
+* reduces manual work;
+* reduces financial errors;
+* improves decision quality;
+* increases explainability;
+* strengthens company memory;
+* simplifies workflows;
+* improves scalability.
+
+Otherwise it should remain outside the roadmap.
+
+⸻
+
+AI Decision Rules
+
+Artificial intelligence must never be used simply because it is available.
+
+AI should only be introduced when it clearly improves:
+
+* understanding;
+* reasoning;
+* classification;
+* prediction;
+* explanation.
+
+Deterministic logic remains preferable whenever deterministic rules solve the problem more reliably.
+
+⸻
+
+Build vs Buy
+
+Whenever a capability is needed, Numera evaluates:
+
+1. Build internally.
+2. Integrate an existing solution.
+3. Use an external service.
+
+Decision criteria:
+
+* strategic importance;
+* differentiation;
+* maintenance effort;
+* cost;
+* vendor lock-in;
+* performance;
+* security.
+
+Core intellectual property should remain internal.
+
+Commodity capabilities may be integrated.
+
+⸻
+
+Architecture Decisions
+
+Architecture decisions require an ADR (Architecture Decision Record).
+
+Every ADR must include:
+
+* context;
+* alternatives considered;
+* decision;
+* consequences;
+* review date.
+
+Architecture without documentation is not acceptable.
+
+⸻
+
+Product Decisions
+
+Major product decisions require:
+
+* user problem;
+* proposed solution;
+* expected value;
+* measurable success criteria;
+* risks;
+* alternatives rejected.
+
+⸻
+
+Memory Decisions
+
+Every new memory type must define:
+
+* why it exists;
+* what creates it;
+* when it expires;
+* who can edit it;
+* how it influences reasoning.
+
+Memory should never become uncontrolled accumulation.
+
+⸻
+
+Rule Decisions
+
+Every business rule must be:
+
+* explicit;
+* versioned;
+* testable;
+* traceable;
+* replaceable.
+
+Hidden rules are prohibited.
+
+⸻
+
+Quality Gate
+
+Before implementation, every significant initiative must answer:
+
+* Is the problem real?
+* Is the solution simple?
+* Is it understandable?
+* Is it testable?
+* Is it explainable?
+* Is it maintainable?
+* Is it scalable?
+* Does it respect the Constitution?
+
+If any answer is negative, the proposal must be reviewed.
+
+⸻
+
+Escalation
+
+When disagreement exists:
+
+1. Review the Constitution.
+2. Review the System Principles.
+3. Review this Decision Framework.
+4. Create an RFC if uncertainty remains.
+5. Record the final decision in the Decision Log.
+
+Disagreements should create knowledge, not confusion.
+
+⸻
+
+Continuous Review
+
+Decisions are not immutable.
+
+If evidence shows a better solution, decisions may be revisited.
+
+Every change must preserve traceability.
+
+⸻
+
+Closing Statement
+
+The purpose of this framework is not to slow development.
+
+Its purpose is to ensure that every improvement strengthens Numera instead of making it more complex.
+
+A product becomes great not only because of the decisions it makes, but also because of the decisions it deliberately refuses to make.
