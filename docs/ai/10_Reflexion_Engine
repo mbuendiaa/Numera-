@@ -1,0 +1,408 @@
+# NUMERA
+
+# AI-10 Reflection Engine
+
+---
+
+**Document ID:** AI-10
+
+**Version:** 0.1
+
+**Status:** Draft
+
+**Created:** 2026-06-29
+
+**Owner:** Founding Team
+
+---
+
+# Purpose
+
+The Reflection Engine is responsible for evaluating the outcome of every significant decision made by Numera.
+
+Rather than learning immediately from every interaction, Numera reflects on what happened, compares the expected outcome with the actual outcome and determines whether new knowledge should be created.
+
+Reflection transforms experience into reliable organisational intelligence.
+
+---
+
+# Philosophy
+
+Execution is not the end of a decision.
+
+Learning begins after execution.
+
+Reflection ensures that improvements are based on validated evidence rather than isolated events.
+
+---
+
+# Objectives
+
+The Reflection Engine must:
+
+- evaluate decision quality;
+- detect incorrect recommendations;
+- identify repeated corrections;
+- propose improvements;
+- strengthen successful behaviours;
+- protect the system from learning incorrect patterns.
+
+---
+
+# Reflection Cycle
+
+Every completed workflow follows the same cycle.
+
+```text
+Decision
+    ↓
+Execution
+    ↓
+Outcome
+    ↓
+Reflection
+    ↓
+Learning Candidate
+    ↓
+Validation
+    ↓
+Memory Update
+    ↓
+Knowledge Improvement
+```
+
+No learning bypasses reflection.
+
+---
+
+# Reflection Inputs
+
+The engine analyses:
+
+- original recommendation;
+- selected hypothesis;
+- confidence score;
+- execution result;
+- user corrections;
+- applied rules;
+- active context;
+- historical decisions.
+
+Reflection always compares **expectation vs. reality**.
+
+---
+
+# Outcome Categories
+
+## Successful
+
+The recommendation was accepted without modification.
+
+Example:
+
+Invoice automatically posted.
+
+No corrections.
+
+Confidence increases.
+
+---
+
+## Improved
+
+The recommendation required minor adjustments.
+
+Example:
+
+Correct account.
+
+Wrong cost centre.
+
+Small learning opportunity.
+
+---
+
+## Corrected
+
+The user changed the recommendation.
+
+Reflection investigates:
+
+- Why?
+- Which evidence was missing?
+- Which engine failed?
+
+---
+
+## Rejected
+
+The recommendation was discarded.
+
+This creates a high-priority learning candidate.
+
+---
+
+## Failed
+
+Execution could not complete.
+
+Reasons may include:
+
+- missing data;
+- rule conflict;
+- external integration failure;
+- invalid assumptions.
+
+Failures must always be analysed.
+
+---
+
+# Root Cause Analysis
+
+Reflection identifies the origin of the problem.
+
+Possible causes:
+
+- Understanding error.
+- Missing memory.
+- Wrong context.
+- Outdated rule.
+- Weak reasoning.
+- Low-quality OCR.
+- Missing supplier history.
+- User preference not captured.
+
+Learning depends on identifying the correct cause.
+
+---
+
+# Learning Candidates
+
+Reflection never updates the system directly.
+
+Instead, it creates Learning Candidates.
+
+Example:
+
+Supplier always invoices using account 627500.
+
+Evidence:
+
+23 corrected invoices.
+
+Confidence:
+
+91%.
+
+Status:
+
+Pending validation.
+
+---
+
+# Validation
+
+Learning Candidates require validation.
+
+Validation may occur through:
+
+- repeated observations;
+- administrator approval;
+- company policy;
+- statistical evidence.
+
+Only validated candidates become memory.
+
+---
+
+# Reflection Metrics
+
+The engine continuously measures:
+
+- recommendation accuracy;
+- correction rate;
+- confidence calibration;
+- rule violations;
+- automation success;
+- human intervention frequency;
+- repeated exceptions.
+
+Metrics guide future improvements.
+
+---
+
+# Feedback Loops
+
+Reflection generates feedback for:
+
+## Memory Engine
+
+Create or update memories.
+
+---
+
+## Enterprise Knowledge Universe (EKU)
+
+Strengthen or weaken relationships.
+
+---
+
+## Confidence Engine
+
+Adjust confidence calibration.
+
+---
+
+## Rule Engine
+
+Suggest rule reviews.
+
+---
+
+## Reasoning Engine
+
+Improve hypothesis ranking.
+
+Reflection benefits every cognitive component.
+
+---
+
+# Explainability
+
+Reflection records:
+
+- expected decision;
+- actual decision;
+- differences;
+- identified causes;
+- actions taken.
+
+The learning process must be auditable.
+
+---
+
+# Safety
+
+Reflection never changes:
+
+- legal rules;
+- fiscal regulations;
+- accounting standards;
+- security policies.
+
+Only authorised users may approve structural changes.
+
+---
+
+# Continuous Improvement
+
+The objective is not simply to automate more.
+
+The objective is to improve decision quality over time.
+
+Better explanations.
+
+Fewer corrections.
+
+Higher trust.
+
+---
+
+# Reflection Dashboard
+
+The Reflection Engine exposes operational metrics to administrators.
+
+Examples:
+
+- Recommendation acceptance rate.
+- Corrections by supplier.
+- Corrections by document type.
+- Most common reasoning failures.
+- Confidence distribution.
+- Learning candidates awaiting approval.
+- Average improvement over time.
+
+This dashboard allows organisations to monitor how Numera evolves and where further optimisation is required.
+
+---
+
+# Reflection Events
+
+Every reflection generates a structured event.
+
+Example:
+
+```text
+Reflection Event
+
+ID: REF-000234
+
+Document:
+Invoice INV-2026-1045
+
+Original Recommendation:
+Account 628000
+
+Final Decision:
+Account 627500
+
+Reason:
+Supplier changed accounting policy
+
+Affected Engines:
+Memory Engine
+Reasoning Engine
+Confidence Engine
+
+Learning Candidate:
+Created
+
+Status:
+Pending Validation
+```
+
+Reflection events provide complete traceability.
+
+---
+
+# Future Evolution
+
+Future versions may include:
+
+- cross-company benchmarking (opt-in and anonymised);
+- anomaly discovery;
+- predictive process improvement;
+- recommendation quality scoring;
+- self-assessment dashboards;
+- autonomous proposal of new business rules;
+- simulation of learning impact before activation.
+
+---
+
+# Success Criteria
+
+The Reflection Engine succeeds when:
+
+- repeated mistakes decrease;
+- memory quality improves;
+- confidence becomes better calibrated;
+- users observe continuous improvement without losing control;
+- every learning decision remains fully auditable.
+
+---
+
+# Closing Statement
+
+Reflection is the mechanism that converts experience into organisational intelligence.
+
+Without reflection, AI repeats.
+
+With reflection, AI evolves.
+
+Numera learns deliberately, transparently and under human governance.
+
+Every improvement is traceable.
+
+Every lesson is validated.
+
+Every learning strengthens the Enterprise Knowledge Universe and makes future decisions safer, faster and more trustworthy.
