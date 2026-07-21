@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import DateTime, Float, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from numera.infrastructure.database.base import Base
@@ -21,6 +21,7 @@ class CompanyORM(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     suppliers: Mapped[list["SupplierORM"]] = relationship(back_populates="company")
+    journal_entries: Mapped[list["JournalEntryORM"]] = relationship(back_populates="company")
 
 
 class SupplierORM(Base):
@@ -82,3 +83,56 @@ class DocumentORM(Base):
     extracted_fields_json: Mapped[str] = mapped_column(Text, default="{}")
     created_invoice_id: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class JournalEntryORM(Base):
+    __tablename__ = "journal_entries"
+    __table_args__ = (
+        UniqueConstraint("source_document_id", name="uq_journal_entry_source_document"),
+    )
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("journal"))
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), nullable=False, index=True)
+    event_type: Mapped[str] = mapped_column(String, nullable=False)
+    source_event_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    source_document_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    entry_date: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String, default="proposed", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    company: Mapped[CompanyORM] = relationship(back_populates="journal_entries")
+    lines: Mapped[list["JournalLineORM"]] = relationship(
+        back_populates="entry",
+        cascade="all, delete-orphan",
+        order_by="JournalLineORM.position",
+    )
+
+    @property
+    def total_debit(self) -> float:
+        return round(sum(line.debit for line in self.lines), 2)
+
+    @property
+    def total_credit(self) -> float:
+        return round(sum(line.credit for line in self.lines), 2)
+
+    @property
+    def is_balanced(self) -> bool:
+        return abs(self.total_debit - self.total_credit) <= 0.02
+
+
+class JournalLineORM(Base):
+    __tablename__ = "journal_lines"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("journal_line"))
+    journal_entry_id: Mapped[str] = mapped_column(
+        ForeignKey("journal_entries.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    position: Mapped[int] = mapped_column(nullable=False)
+    account_code: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    account_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    debit: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    credit: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+
+    entry: Mapped[JournalEntryORM] = relationship(back_populates="lines")

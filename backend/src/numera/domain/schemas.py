@@ -77,6 +77,8 @@ class DocumentRead(BaseModel):
 
 
 class JournalLineRead(BaseModel):
+    id: str | None = None
+    position: int | None = None
     account_code: str
     account_name: str | None = None
     description: str
@@ -85,6 +87,7 @@ class JournalLineRead(BaseModel):
 
 
 class JournalEntryRead(BaseModel):
+    id: str | None = None
     company_id: str
     event_type: str
     source_event_id: str | None = None
@@ -96,6 +99,7 @@ class JournalEntryRead(BaseModel):
     total_debit: float
     total_credit: float
     is_balanced: bool
+    model_config = {"from_attributes": True}
 
 
 class DocumentUploadResponse(BaseModel):

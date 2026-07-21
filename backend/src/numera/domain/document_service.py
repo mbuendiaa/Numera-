@@ -6,7 +6,12 @@ from numera.domain.accounting_mapper import AccountingEventMapper
 from numera.domain.schemas import InvoiceCreate
 from numera.engines.accounting.engine import AccountingEngine
 from numera.engines.document.pipeline import DocumentPipeline
-from numera.infrastructure.repositories import DocumentRepository, InvoiceRepository, SupplierRepository
+from numera.infrastructure.repositories import (
+    DocumentRepository,
+    InvoiceRepository,
+    JournalRepository,
+    SupplierRepository,
+)
 
 
 class DocumentService:
@@ -15,6 +20,7 @@ class DocumentService:
         self.documents = DocumentRepository(db)
         self.invoices = InvoiceRepository(db)
         self.suppliers = SupplierRepository(db)
+        self.journal = JournalRepository(db)
         self.pipeline = DocumentPipeline()
         self.accounting_mapper = AccountingEventMapper()
         self.accounting_engine = AccountingEngine()
@@ -51,7 +57,8 @@ class DocumentService:
                     created_invoice,
                     supplier_name=supplier_name,
                 )
-                proposed_journal_entry = self.accounting_engine.generate_entry(event)
+                generated_entry = self.accounting_engine.generate_entry(event)
+                proposed_journal_entry, _ = self.journal.save(generated_entry)
 
         return document, result, created_invoice, proposed_journal_entry
 

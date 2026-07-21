@@ -15,20 +15,27 @@ from numera.infrastructure.repositories import DocumentRepository
 router = APIRouter()
 
 
+def _enum_value(value):
+    return value.value if hasattr(value, "value") else value
+
+
 def _journal_entry_to_read(entry):
     if entry is None:
         return None
 
     return JournalEntryRead(
+        id=getattr(entry, "id", None),
         company_id=entry.company_id,
-        event_type=entry.event_type.value,
+        event_type=_enum_value(entry.event_type),
         source_event_id=entry.source_event_id,
         source_document_id=entry.source_document_id,
         entry_date=entry.entry_date,
         description=entry.description,
-        status=entry.status.value,
+        status=_enum_value(entry.status),
         lines=[
             JournalLineRead(
+                id=getattr(line, "id", None),
+                position=getattr(line, "position", None),
                 account_code=line.account_code,
                 account_name=line.account_name,
                 description=line.description,
