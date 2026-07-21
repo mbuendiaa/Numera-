@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: numera-backend
+Version: 0.5.0
+Summary: Numera Core Platform backend
+Requires-Python: >=3.10
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn[standard]>=0.30.0
+Requires-Dist: pydantic>=2.7.0
+Requires-Dist: pydantic-settings>=2.3.0
+Requires-Dist: sqlalchemy>=2.0.0
+Requires-Dist: python-multipart>=0.0.9
+Requires-Dist: pypdf>=4.0.0
+Requires-Dist: pillow>=10.0.0
+Requires-Dist: pytesseract>=0.3.10
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: httpx>=0.27.0; extra == "dev"
+Requires-Dist: ruff>=0.5.0; extra == "dev"

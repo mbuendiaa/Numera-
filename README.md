@@ -1,20 +1,28 @@
-# Numera
+# Numera Core Platform v0.1
 
-Numera is an AI financial intelligence layer for SMEs, accounting firms and finance teams.
+Initial backend foundation for Numera.
 
-It is not intended to replace existing ERPs or accounting tools. Numera works on top of them: it reads documents, proposes accounting entries, detects errors and learns how each company works.
+## Stack
 
-## Core principle
+- FastAPI
+- Pydantic
+- SQLAlchemy-ready structure
+- Clean Architecture style
+- Domain modules prepared for the Cognitive System
 
-> We do not sell an ERP. We sell recovered time.
+## Run locally
 
-## Initial documentation
+```cmd
+cd backend
+py -m venv .venv
+.venv\Scripts\activate
+py -m pip install -e .[dev]
+uvicorn numera.main:app --reload
+```
 
-The project documentation lives in `/docs`.
+Then open:
 
-- `00_Vision_and_Philosophy.md`
-- `Decision_Log.md`
-- `Roadmap.md`
-- `Glossary.md`
-
-Project start date: 2026-06-26.
+```text
+http://127.0.0.1:8000/health
+http://127.0.0.1:8000/docs
+```
