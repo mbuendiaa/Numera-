@@ -1,9 +1,12 @@
+import json
+
 from sqlalchemy.orm import Session
 
 from numera.domain.accounting.models import ChartAccount, JournalEntry
 from numera.domain.schemas import CompanyCreate, InvoiceCreate, SupplierCreate
 from numera.infrastructure.persistence.models import (
     AccountORM,
+    BusinessEventORM,
     CognitiveDecisionORM,
     CompanyORM,
     DocumentORM,
@@ -37,11 +40,7 @@ class AccountRepository:
         return self.db.query(AccountORM.id).filter(AccountORM.company_id == company_id).first() is not None
 
     def get(self, company_id: str, code: str):
-        return (
-            self.db.query(AccountORM)
-            .filter(AccountORM.company_id == company_id, AccountORM.code == code)
-            .first()
-        )
+        return self.db.query(AccountORM).filter(AccountORM.company_id == company_id, AccountORM.code == code).first()
 
     def list(self, company_id: str, *, category: str | None = None, active_only: bool = True, search: str | None = None):
         query = self.db.query(AccountORM).filter(AccountORM.company_id == company_id)
@@ -88,12 +87,7 @@ class SupplierRepository:
         return self.db.query(SupplierORM).order_by(SupplierORM.created_at.desc()).all()
 
     def find_by_name(self, company_id: str, name: str):
-        return (
-            self.db.query(SupplierORM)
-            .filter(SupplierORM.company_id == company_id)
-            .filter(SupplierORM.name.ilike(f"%{name}%"))
-            .first()
-        )
+        return self.db.query(SupplierORM).filter(SupplierORM.company_id == company_id).filter(SupplierORM.name.ilike(f"%{name}%")).first()
 
 
 class InvoiceRepository:
@@ -109,6 +103,60 @@ class InvoiceRepository:
 
     def list(self):
         return self.db.query(InvoiceORM).order_by(InvoiceORM.created_at.desc()).all()
+
+
+class BusinessEventRepository:
+    def __init__(self, db: Session):
+        self.db = db
+
+    @staticmethod
+    def _entity_reference(event) -> tuple[str | None, str | None]:
+        candidates = (
+            ("purchase", "purchase_id"),
+            ("invoice", "invoice_id"),
+            ("supplier", "supplier_id"),
+            ("journal_entry", "journal_entry_id"),
+            ("document", "document_id"),
+        )
+        for entity_type, attribute in candidates:
+            value = getattr(event, attribute, None)
+            if value:
+                return entity_type, value
+        source_document_id = getattr(event, "source_document_id", None)
+        if source_document_id:
+            return "document", source_document_id
+        return None, None
+
+    def append(self, event):
+        existing = self.db.query(BusinessEventORM).filter(BusinessEventORM.event_id == event.event_id).first()
+        if existing:
+            return existing
+        entity_type, entity_id = self._entity_reference(event)
+        obj = BusinessEventORM(
+            event_id=event.event_id,
+            company_id=event.company_id,
+            event_type=event.event_type,
+            occurred_at=event.occurred_at,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            payload_json=json.dumps(event.to_dict(), ensure_ascii=False),
+        )
+        self.db.add(obj)
+        self.db.commit()
+        self.db.refresh(obj)
+        return obj
+
+    def list(self, *, company_id: str | None = None, event_type: str | None = None, entity_type: str | None = None, entity_id: str | None = None, limit: int = 50):
+        query = self.db.query(BusinessEventORM)
+        if company_id:
+            query = query.filter(BusinessEventORM.company_id == company_id)
+        if event_type:
+            query = query.filter(BusinessEventORM.event_type == event_type)
+        if entity_type:
+            query = query.filter(BusinessEventORM.entity_type == entity_type)
+        if entity_id:
+            query = query.filter(BusinessEventORM.entity_id == entity_id)
+        return query.order_by(BusinessEventORM.occurred_at.desc()).limit(limit).all()
 
 
 class CognitiveDecisionRepository:
@@ -159,7 +207,6 @@ class JournalRepository:
             existing = self.find_by_document(entry.source_document_id)
             if existing:
                 return existing, False
-
         obj = JournalEntryORM(
             company_id=entry.company_id,
             event_type=entry.event_type.value,
@@ -168,17 +215,7 @@ class JournalRepository:
             entry_date=entry.entry_date,
             description=entry.description,
             status=entry.status.value,
-            lines=[
-                JournalLineORM(
-                    position=position,
-                    account_code=line.account_code,
-                    account_name=line.account_name,
-                    description=line.description,
-                    debit=line.debit,
-                    credit=line.credit,
-                )
-                for position, line in enumerate(entry.lines, start=1)
-            ],
+            lines=[JournalLineORM(position=position, account_code=line.account_code, account_name=line.account_name, description=line.description, debit=line.debit, credit=line.credit) for position, line in enumerate(entry.lines, start=1)],
         )
         self.db.add(obj)
         self.db.commit()
@@ -188,16 +225,8 @@ class JournalRepository:
     def get(self, entry_id: str):
         return self.db.query(JournalEntryORM).filter(JournalEntryORM.id == entry_id).first()
 
-    def list(
-        self,
-        company_id: str | None = None,
-        status: str | None = None,
-        date_from: str | None = None,
-        date_to: str | None = None,
-        account_code: str | None = None,
-    ):
+    def list(self, company_id: str | None = None, status: str | None = None, date_from: str | None = None, date_to: str | None = None, account_code: str | None = None):
         from numera.engines.ledger.engine import parse_ledger_date
-
         query = self.db.query(JournalEntryORM)
         if company_id:
             query = query.filter(JournalEntryORM.company_id == company_id)
@@ -205,11 +234,7 @@ class JournalRepository:
             query = query.filter(JournalEntryORM.status == status)
         if account_code:
             query = query.join(JournalLineORM).filter(JournalLineORM.account_code == account_code).distinct()
-
         entries = query.order_by(JournalEntryORM.created_at.desc()).all()
-
-        # Entry dates currently retain the source invoice format (DD/MM/YYYY).
-        # Parse them in the application layer until the migration to a native Date column.
         lower = parse_ledger_date(date_from) if date_from else None
         upper = parse_ledger_date(date_to) if date_to else None
         if lower or upper:
@@ -222,15 +247,10 @@ class JournalRepository:
                     continue
                 filtered.append(entry)
             entries = filtered
-
         return sorted(entries, key=lambda entry: parse_ledger_date(entry.entry_date), reverse=True)
 
     def find_by_document(self, source_document_id: str):
-        return (
-            self.db.query(JournalEntryORM)
-            .filter(JournalEntryORM.source_document_id == source_document_id)
-            .first()
-        )
+        return self.db.query(JournalEntryORM).filter(JournalEntryORM.source_document_id == source_document_id).first()
 
     def update_status(self, entry_id: str, status: str):
         entry = self.get(entry_id)
