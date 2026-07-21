@@ -53,7 +53,17 @@ class MasterDataEngine:
         if not normalized_name:
             return None
 
-        supplier = self.suppliers.find_by_normalized_name(company_id, normalized_name)
+        # Master-data matching deliberately compares normalized names instead of
+        # relying on a broad SQL substring search, which can join the wrong party.
+        supplier = next(
+            (
+                candidate
+                for candidate in self.suppliers.list()
+                if candidate.company_id == company_id
+                and normalize_party_name(candidate.name) == normalized_name
+            ),
+            None,
+        )
         if supplier is not None:
             return supplier
 
