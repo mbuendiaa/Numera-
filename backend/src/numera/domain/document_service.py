@@ -5,6 +5,14 @@ from sqlalchemy.orm import Session
 from numera.domain.accounting_mapper import AccountingEventMapper
 from numera.domain.schemas import InvoiceCreate
 from numera.engines.accounting.engine import AccountingEngine
+from numera.engines.business_events import (
+    DocumentUploaded,
+    EventBus,
+    InvoiceCreated,
+    JournalEntryProposed,
+    SupplierResolved,
+    event_bus,
+)
 from numera.engines.chart_of_accounts.engine import ChartOfAccountsEngine
 from numera.engines.document.pipeline import DocumentPipeline
 from numera.engines.ledger.engine import LedgerEngine
@@ -19,8 +27,9 @@ from numera.infrastructure.repositories import (
 
 
 class DocumentService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, bus: EventBus | None = None):
         self.db = db
+        self.bus = bus or event_bus
         self.documents = DocumentRepository(db)
         self.invoices = InvoiceRepository(db)
         self.suppliers = SupplierRepository(db)
@@ -43,6 +52,14 @@ class DocumentService:
             extracted_text_preview=result["text_preview"],
             extracted_fields_json=json.dumps(result["extracted_fields"], ensure_ascii=False),
         )
+        self.bus.publish(
+            DocumentUploaded(
+                company_id=company_id,
+                document_id=document.id,
+                filename=document.filename,
+                document_type=document.document_type,
+            )
+        )
 
         created_invoice = None
         proposed_journal_entry = None
@@ -56,14 +73,33 @@ class DocumentService:
 
             if created_invoice:
                 document = self.documents.set_created_invoice(document.id, created_invoice.id)
+                self.bus.publish(
+                    InvoiceCreated(
+                        company_id=company_id,
+                        invoice_id=created_invoice.id,
+                        supplier_id=created_invoice.supplier_id,
+                        invoice_number=created_invoice.invoice_number,
+                        total_amount=created_invoice.total_amount,
+                        source_document_id=document.id,
+                    )
+                )
 
                 supplier_name = self._field_value(result["extracted_fields"], "supplier_name")
-                event = self.accounting_mapper.from_purchase_invoice(
+                accounting_event = self.accounting_mapper.from_purchase_invoice(
                     created_invoice,
                     supplier_name=supplier_name,
                 )
-                generated_entry = self.accounting_engine.generate_entry(event)
+                generated_entry = self.accounting_engine.generate_entry(accounting_event)
                 proposed_journal_entry, _ = self.ledger.record(generated_entry)
+                self.bus.publish(
+                    JournalEntryProposed(
+                        company_id=company_id,
+                        journal_entry_id=proposed_journal_entry.id,
+                        source_document_id=document.id,
+                        total_debit=proposed_journal_entry.total_debit,
+                        total_credit=proposed_journal_entry.total_credit,
+                    )
+                )
 
         return document, result, created_invoice, proposed_journal_entry
 
@@ -78,6 +114,14 @@ class DocumentService:
         supplier_name = self._field_value(extracted_fields, "supplier_name")
         supplier = self.master_data.resolve_supplier(company_id, supplier_name)
         supplier_id = supplier.id if supplier else None
+        if supplier:
+            self.bus.publish(
+                SupplierResolved(
+                    company_id=company_id,
+                    supplier_id=supplier.id,
+                    supplier_name=supplier.name,
+                )
+            )
 
         invoice_number = self._field_value(extracted_fields, "invoice_number") or f"AUTO-{document_id[-6:]}"
         invoice_date = self._field_value(extracted_fields, "invoice_date") or "unknown"
