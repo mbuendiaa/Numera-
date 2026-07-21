@@ -12,9 +12,9 @@ class AccountingEngine:
         raise NotImplementedError(f"Unsupported accounting event type: {event.event_type}")
 
     def _purchase_invoice_entry(self, event: AccountingEvent) -> JournalEntry:
-        purchase = self.chart.get("600000")
-        vat = self.chart.get("472000")
-        supplier = self.chart.get("400000")
+        purchase = self.chart.get(event.company_id, "600000")
+        vat = self.chart.get(event.company_id, "472000")
+        supplier = self.chart.get(event.company_id, "400000")
         supplier_label = event.supplier_name or "Proveedor"
 
         return JournalEntry(

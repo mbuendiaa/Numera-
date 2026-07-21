@@ -69,10 +69,20 @@ class AccountingEvent(BaseModel):
 
 
 class ChartAccount(BaseModel):
-    code: str
+    code: str = Field(min_length=3, max_length=12, pattern=r"^[0-9]+$")
     name: str
-    type: str
+    group: int = Field(ge=1, le=9)
+    category: str
+    normal_balance: str
+    financial_statement: str
+    vat_behavior: str = "none"
+    reconcilable: bool = False
     is_active: bool = True
+
+    @property
+    def type(self) -> str:
+        """Backward-compatible alias used by the original accounting engine."""
+        return self.category
 
 
 class PostingRule(BaseModel):

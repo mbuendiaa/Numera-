@@ -5,8 +5,11 @@ from sqlalchemy.orm import Session
 from numera.domain.accounting_mapper import AccountingEventMapper
 from numera.domain.schemas import InvoiceCreate
 from numera.engines.accounting.engine import AccountingEngine
+from numera.engines.chart_of_accounts.engine import ChartOfAccountsEngine
 from numera.engines.document.pipeline import DocumentPipeline
+from numera.engines.ledger.engine import LedgerEngine
 from numera.infrastructure.repositories import (
+    AccountRepository,
     DocumentRepository,
     InvoiceRepository,
     JournalRepository,
@@ -20,10 +23,10 @@ class DocumentService:
         self.documents = DocumentRepository(db)
         self.invoices = InvoiceRepository(db)
         self.suppliers = SupplierRepository(db)
-        self.journal = JournalRepository(db)
+        self.ledger = LedgerEngine(JournalRepository(db))
         self.pipeline = DocumentPipeline()
         self.accounting_mapper = AccountingEventMapper()
-        self.accounting_engine = AccountingEngine()
+        self.accounting_engine = AccountingEngine(ChartOfAccountsEngine(AccountRepository(db)))
 
     def upload_and_process(self, *, company_id: str, file):
         result = self.pipeline.run(company_id=company_id, file=file)
@@ -58,7 +61,7 @@ class DocumentService:
                     supplier_name=supplier_name,
                 )
                 generated_entry = self.accounting_engine.generate_entry(event)
-                proposed_journal_entry, _ = self.journal.save(generated_entry)
+                proposed_journal_entry, _ = self.ledger.record(generated_entry)
 
         return document, result, created_invoice, proposed_journal_entry
 

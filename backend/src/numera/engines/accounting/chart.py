@@ -1,21 +1,17 @@
 from numera.domain.accounting.models import ChartAccount
+from numera.engines.chart_of_accounts.seed import DEFAULT_PGC_ACCOUNTS
 
-DEFAULT_SPANISH_CHART = {
-    "400000": ChartAccount(code="400000", name="Proveedores", type="liability"),
-    "430000": ChartAccount(code="430000", name="Clientes", type="asset"),
-    "472000": ChartAccount(code="472000", name="Hacienda Pública, IVA soportado", type="asset"),
-    "477000": ChartAccount(code="477000", name="Hacienda Pública, IVA repercutido", type="liability"),
-    "600000": ChartAccount(code="600000", name="Compras de mercaderías", type="expense"),
-    "700000": ChartAccount(code="700000", name="Ventas de mercaderías", type="income"),
-    "572000": ChartAccount(code="572000", name="Bancos", type="asset"),
-}
+DEFAULT_SPANISH_CHART = {account.code: account for account in DEFAULT_PGC_ACCOUNTS}
 
 
 class ChartOfAccounts:
+    """In-memory chart used by unit tests and standalone engine execution."""
+
     def __init__(self, accounts: dict[str, ChartAccount] | None = None):
         self.accounts = accounts or DEFAULT_SPANISH_CHART
 
-    def get(self, code: str) -> ChartAccount:
-        if code not in self.accounts:
-            raise KeyError(f"Account {code} not found in chart of accounts.")
-        return self.accounts[code]
+    def get(self, company_id_or_code: str, code: str | None = None) -> ChartAccount:
+        account_code = code or company_id_or_code
+        if account_code not in self.accounts:
+            raise KeyError(f"Account {account_code} not found in chart of accounts.")
+        return self.accounts[account_code]

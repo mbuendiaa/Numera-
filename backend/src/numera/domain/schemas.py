@@ -110,3 +110,26 @@ class DocumentUploadResponse(BaseModel):
     extracted_fields: dict
     created_invoice: InvoiceRead | None = None
     proposed_journal_entry: JournalEntryRead | None = None
+
+
+class AccountCreate(BaseModel):
+    code: str = Field(..., min_length=3, max_length=12, pattern=r"^[0-9]+$")
+    name: str
+    group: int = Field(..., ge=1, le=9)
+    category: str = Field(..., examples=["asset", "liability", "equity", "expense", "income"])
+    normal_balance: str = Field(..., examples=["debit", "credit"])
+    financial_statement: str = Field(..., examples=["balance_sheet", "profit_and_loss"])
+    vat_behavior: str = "none"
+    reconcilable: bool = False
+    is_active: bool = True
+
+
+class AccountRead(AccountCreate):
+    id: str
+    company_id: str
+    model_config = {"from_attributes": True}
+
+
+class AccountSeedResult(BaseModel):
+    company_id: str
+    created_accounts: int

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Float, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from numera.infrastructure.database.base import Base
@@ -22,6 +22,27 @@ class CompanyORM(Base):
 
     suppliers: Mapped[list["SupplierORM"]] = relationship(back_populates="company")
     journal_entries: Mapped[list["JournalEntryORM"]] = relationship(back_populates="company")
+    accounts: Mapped[list["AccountORM"]] = relationship(back_populates="company", cascade="all, delete-orphan")
+
+
+class AccountORM(Base):
+    __tablename__ = "accounts"
+    __table_args__ = (UniqueConstraint("company_id", "code", name="uq_account_company_code"),)
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("account"))
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), nullable=False, index=True)
+    code: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    group: Mapped[int] = mapped_column(Integer, nullable=False)
+    category: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    normal_balance: Mapped[str] = mapped_column(String, nullable=False)
+    financial_statement: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    vat_behavior: Mapped[str] = mapped_column(String, default="none", nullable=False)
+    reconcilable: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    company: Mapped[CompanyORM] = relationship(back_populates="accounts")
 
 
 class SupplierORM(Base):

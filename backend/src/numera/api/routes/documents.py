@@ -1,53 +1,18 @@
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
 
+from numera.api.serializers import journal_entry_to_read
 from numera.domain.document_service import DocumentService
 from numera.domain.schemas import (
     DocumentRead,
     DocumentUploadResponse,
     InvoiceRead,
-    JournalEntryRead,
-    JournalLineRead,
 )
 from numera.infrastructure.database.session import get_db
 from numera.infrastructure.repositories import DocumentRepository
 
 router = APIRouter()
 
-
-def _enum_value(value):
-    return value.value if hasattr(value, "value") else value
-
-
-def _journal_entry_to_read(entry):
-    if entry is None:
-        return None
-
-    return JournalEntryRead(
-        id=getattr(entry, "id", None),
-        company_id=entry.company_id,
-        event_type=_enum_value(entry.event_type),
-        source_event_id=entry.source_event_id,
-        source_document_id=entry.source_document_id,
-        entry_date=entry.entry_date,
-        description=entry.description,
-        status=_enum_value(entry.status),
-        lines=[
-            JournalLineRead(
-                id=getattr(line, "id", None),
-                position=getattr(line, "position", None),
-                account_code=line.account_code,
-                account_name=line.account_name,
-                description=line.description,
-                debit=line.debit,
-                credit=line.credit,
-            )
-            for line in entry.lines
-        ],
-        total_debit=entry.total_debit,
-        total_credit=entry.total_credit,
-        is_balanced=entry.is_balanced,
-    )
 
 
 @router.post("/upload", response_model=DocumentUploadResponse)
@@ -68,7 +33,7 @@ def upload_document(
         explanation=result["explanation"],
         extracted_fields=result["extracted_fields"],
         created_invoice=InvoiceRead.model_validate(created_invoice) if created_invoice else None,
-        proposed_journal_entry=_journal_entry_to_read(proposed_entry),
+        proposed_journal_entry=journal_entry_to_read(proposed_entry),
     )
 
 
