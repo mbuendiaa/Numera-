@@ -19,6 +19,7 @@ from numera.engines.ledger.engine import LedgerEngine
 from numera.engines.master_data.engine import MasterDataEngine
 from numera.infrastructure.repositories import (
     AccountRepository,
+    BusinessEventRepository,
     DocumentRepository,
     InvoiceRepository,
     JournalRepository,
@@ -30,6 +31,7 @@ class DocumentService:
     def __init__(self, db: Session, bus: EventBus | None = None):
         self.db = db
         self.bus = bus or event_bus
+        self.event_store = BusinessEventRepository(db)
         self.documents = DocumentRepository(db)
         self.invoices = InvoiceRepository(db)
         self.suppliers = SupplierRepository(db)
@@ -38,6 +40,10 @@ class DocumentService:
         self.pipeline = DocumentPipeline()
         self.accounting_mapper = AccountingEventMapper()
         self.accounting_engine = AccountingEngine(ChartOfAccountsEngine(AccountRepository(db)))
+
+    def _publish(self, event):
+        self.event_store.append(event)
+        return self.bus.publish(event)
 
     def upload_and_process(self, *, company_id: str, file):
         result = self.pipeline.run(company_id=company_id, file=file)
@@ -52,7 +58,7 @@ class DocumentService:
             extracted_text_preview=result["text_preview"],
             extracted_fields_json=json.dumps(result["extracted_fields"], ensure_ascii=False),
         )
-        self.bus.publish(
+        self._publish(
             DocumentUploaded(
                 company_id=company_id,
                 document_id=document.id,
@@ -73,7 +79,7 @@ class DocumentService:
 
             if created_invoice:
                 document = self.documents.set_created_invoice(document.id, created_invoice.id)
-                self.bus.publish(
+                self._publish(
                     InvoiceCreated(
                         company_id=company_id,
                         invoice_id=created_invoice.id,
@@ -91,7 +97,7 @@ class DocumentService:
                 )
                 generated_entry = self.accounting_engine.generate_entry(accounting_event)
                 proposed_journal_entry, _ = self.ledger.record(generated_entry)
-                self.bus.publish(
+                self._publish(
                     JournalEntryProposed(
                         company_id=company_id,
                         journal_entry_id=proposed_journal_entry.id,
@@ -115,7 +121,7 @@ class DocumentService:
         supplier = self.master_data.resolve_supplier(company_id, supplier_name)
         supplier_id = supplier.id if supplier else None
         if supplier:
-            self.bus.publish(
+            self._publish(
                 SupplierResolved(
                     company_id=company_id,
                     supplier_id=supplier.id,
