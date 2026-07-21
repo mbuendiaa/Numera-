@@ -8,6 +8,7 @@ from numera.engines.accounting.engine import AccountingEngine
 from numera.engines.chart_of_accounts.engine import ChartOfAccountsEngine
 from numera.engines.document.pipeline import DocumentPipeline
 from numera.engines.ledger.engine import LedgerEngine
+from numera.engines.master_data.engine import MasterDataEngine
 from numera.infrastructure.repositories import (
     AccountRepository,
     DocumentRepository,
@@ -23,6 +24,7 @@ class DocumentService:
         self.documents = DocumentRepository(db)
         self.invoices = InvoiceRepository(db)
         self.suppliers = SupplierRepository(db)
+        self.master_data = MasterDataEngine(self.suppliers)
         self.ledger = LedgerEngine(JournalRepository(db))
         self.pipeline = DocumentPipeline()
         self.accounting_mapper = AccountingEventMapper()
@@ -73,8 +75,8 @@ class DocumentService:
         if total is None:
             return None
 
-        supplier_name = self._field_value(extracted_fields, "supplier_name") or "Unknown Supplier"
-        supplier = self.suppliers.find_by_name(company_id, supplier_name)
+        supplier_name = self._field_value(extracted_fields, "supplier_name")
+        supplier = self.master_data.resolve_supplier(company_id, supplier_name)
         supplier_id = supplier.id if supplier else None
 
         invoice_number = self._field_value(extracted_fields, "invoice_number") or f"AUTO-{document_id[-6:]}"

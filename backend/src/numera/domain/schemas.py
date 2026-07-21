@@ -20,6 +20,11 @@ class SupplierCreate(BaseModel):
     default_account: str | None = None
 
 
+class SupplierResolveRequest(BaseModel):
+    company_id: str
+    name: str = Field(..., min_length=1)
+
+
 class SupplierRead(SupplierCreate):
     id: str
     model_config = {"from_attributes": True}
