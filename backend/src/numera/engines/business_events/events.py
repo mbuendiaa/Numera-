@@ -37,7 +37,6 @@ class DocumentUploaded(BusinessEvent):
 class SupplierResolved(BusinessEvent):
     supplier_id: str = ""
     supplier_name: str = ""
-    created: bool = False
 
 
 @dataclass(frozen=True, slots=True)
