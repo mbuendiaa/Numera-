@@ -106,6 +106,18 @@ class DocumentORM(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
+class BusinessEventORM(Base):
+    __tablename__ = "business_events"
+
+    event_id: Mapped[str] = mapped_column(String, primary_key=True)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id"), nullable=False, index=True)
+    event_type: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    entity_type: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    entity_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    payload_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
 class JournalEntryORM(Base):
     __tablename__ = "journal_entries"
     __table_args__ = (
