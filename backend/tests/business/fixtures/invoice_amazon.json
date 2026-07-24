@@ -1,0 +1,8 @@
+{
+  "invoice_id": "invoice-amazon-2026-001",
+  "invoice_number": "ES-2026-001",
+  "currency": "EUR",
+  "net_amount": "1000.00",
+  "vat_amount": "210.00",
+  "total_amount": "1210.00"
+}
