@@ -71,11 +71,11 @@ def test_purchase_application_flow() -> None:
         )
     )
 
-    assert created.status == "received"
-    assert approved.status == "approved"
-    assert partially_paid.status == "partially_paid"
+    assert created.status == "RECEIVED"
+    assert approved.status == "APPROVED"
+    assert partially_paid.status == "PARTIALLY_PAID"
     assert partially_paid.outstanding_amount == Decimal("1000.00")
-    assert paid.status == "paid"
+    assert paid.status == "PAID"
     assert paid.outstanding_amount == Decimal("0.00")
     assert [type(event).__name__ for event in publisher.events] == [
         "PurchaseCreated",
