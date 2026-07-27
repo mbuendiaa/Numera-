@@ -39,18 +39,24 @@ def main() -> int:
     print(f"[OK] Purchase created: {purchase.purchase_id}")
 
     purchase = container.approve_purchase.execute(ApprovePurchaseCommand(purchase_id))
-    print(f"[OK] Purchase approved: {purchase.status.value}")
+    print(f"[OK] Purchase approved: {purchase.status}")
 
     purchase = container.register_payment.execute(
         RegisterPaymentCommand(purchase_id, "210.00", Currency.EUR)
     )
-    print(f"[OK] Partial payment: outstanding {purchase.outstanding}")
+    print(
+        f"[OK] Partial payment: outstanding "
+        f"{purchase.outstanding_amount:.2f} {purchase.currency}"
+    )
 
     purchase = container.register_payment.execute(
         RegisterPaymentCommand(purchase_id, "1000.00", Currency.EUR)
     )
-    print(f"[OK] Final payment: outstanding {purchase.outstanding}")
-    print(f"[OK] Purchase status: {purchase.status.value}")
+    print(
+        f"[OK] Final payment: outstanding "
+        f"{purchase.outstanding_amount:.2f} {purchase.currency}"
+    )
+    print(f"[OK] Purchase status: {purchase.status}")
     print(f"[OK] Domain events published: {len(container.event_bus.published_events)}")
     print("=" * 40)
     print("SUCCESS")
