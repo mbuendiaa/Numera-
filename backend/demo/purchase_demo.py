@@ -1,4 +1,4 @@
-"""Run Numera's first executable business demonstration."""
+"""Run Numera's purchase flow through the application and infrastructure layers."""
 
 from __future__ import annotations
 
@@ -10,39 +10,48 @@ _SRC = _BACKEND / "src"
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from numera.domain.purchase import (  # noqa: E402
-    InvoiceId,
-    Purchase,
-    PurchaseId,
-    SupplierId,
+from numera.application.purchase import (  # noqa: E402
+    ApprovePurchaseCommand,
+    CreatePurchaseCommand,
+    RegisterPaymentCommand,
 )
-from numera.domain.shared.value_objects import Currency, Money  # noqa: E402
+from numera.domain.shared.value_objects import Currency  # noqa: E402
+from numera.infrastructure.wiring.container import build_container  # noqa: E402
 
 
 def main() -> int:
-    purchase = Purchase.create(
-        purchase_id=PurchaseId("purchase-amazon-2026-001"),
-        supplier_id=SupplierId("supplier-amazon-es"),
-        invoice_id=InvoiceId("invoice-amazon-2026-001"),
-        total=Money("1210.00", Currency.EUR),
-    )
+    container = build_container(log_events=True)
+    purchase_id = "purchase-amazon-2026-001"
 
     print("NUMERA PURCHASE DEMO")
     print("=" * 40)
     print("[OK] Supplier resolved: Amazon Spain")
-    print(f"[OK] Purchase created: {purchase.id}")
 
-    purchase.approve()
+    purchase = container.create_purchase.execute(
+        CreatePurchaseCommand(
+            purchase_id=purchase_id,
+            supplier_id="supplier-amazon-es",
+            invoice_id="invoice-amazon-2026-001",
+            total_amount="1210.00",
+            currency=Currency.EUR,
+        )
+    )
+    print(f"[OK] Purchase created: {purchase.purchase_id}")
+
+    purchase = container.approve_purchase.execute(ApprovePurchaseCommand(purchase_id))
     print(f"[OK] Purchase approved: {purchase.status.value}")
 
-    purchase.register_payment(Money("210.00", Currency.EUR))
+    purchase = container.register_payment.execute(
+        RegisterPaymentCommand(purchase_id, "210.00", Currency.EUR)
+    )
     print(f"[OK] Partial payment: outstanding {purchase.outstanding}")
 
-    purchase.register_payment(Money("1000.00", Currency.EUR))
-    events = purchase.pull_events()
+    purchase = container.register_payment.execute(
+        RegisterPaymentCommand(purchase_id, "1000.00", Currency.EUR)
+    )
     print(f"[OK] Final payment: outstanding {purchase.outstanding}")
     print(f"[OK] Purchase status: {purchase.status.value}")
-    print(f"[OK] Domain events recorded: {len(events)}")
+    print(f"[OK] Domain events published: {len(container.event_bus.published_events)}")
     print("=" * 40)
     print("SUCCESS")
     return 0
