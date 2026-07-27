@@ -1,4 +1,7 @@
-from numera.application.purchase import CreatePurchaseCommand
+from numera.application.purchase import (
+    ApprovePurchaseCommand,
+    CreatePurchaseCommand,
+)
 from numera.domain.purchase import PurchaseCreated, PurchaseId
 from numera.domain.shared.value_objects import Currency
 from numera.infrastructure.persistence.in_memory import InMemoryPurchaseRepository
@@ -43,10 +46,7 @@ def test_container_wires_shared_repository_across_use_cases() -> None:
     _create_purchase(container)
 
     approved = container.approve_purchase.execute(
-        __import__(
-            "numera.application.purchase",
-            fromlist=["ApprovePurchaseCommand"],
-        ).ApprovePurchaseCommand("purchase-1")
+        ApprovePurchaseCommand("purchase-1")
     )
 
     assert approved.status == "APPROVED"
