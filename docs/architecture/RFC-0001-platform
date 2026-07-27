@@ -1,0 +1,186 @@
+RFC-0001 — Platform Vision
+1. Principios
+
+¿Qué reglas son innegociables?
+
+Por ejemplo:
+
+Domain First.
+Infrastructure is replaceable.
+AI never mutates business data.
+Every state change originates from a Command.
+Every business fact is represented by a Domain Event.
+Read models are disposable.
+2. Arquitectura
+
+Diagrama de alto nivel:
+
+Frontend
+      │
+Presentation
+      │
+Application
+      │
+Domain
+      │
+Infrastructure
+
+Y las dependencias permitidas.
+
+3. Bounded Contexts
+
+No solo una lista, sino una explicación de qué responsabilidad tiene cada uno.
+
+Por ejemplo:
+
+Purchases
+
+Responsabilidad:
+
+gestionar compras
+estado
+pagos
+relación con proveedor
+
+No contabiliza.
+
+Eso es responsabilidad de Accounting.
+
+4. Comunicación
+
+Definir cuándo usar:
+
+Command
+Query
+Domain Event
+Integration Event
+
+Esta diferencia es clave.
+
+5. CQRS
+
+Explicar por qué existe.
+
+Qué pertenece al Command Side.
+
+Qué pertenece al Query Side.
+
+Qué nunca debe mezclarse.
+
+6. Event Bus
+
+Cómo fluye un evento.
+
+Ejemplo:
+
+Invoice Uploaded
+
+↓
+
+OCR Completed
+
+↓
+
+Supplier Resolved
+
+↓
+
+Purchase Created
+
+↓
+
+Journal Entry Proposed
+
+↓
+
+Ledger Updated
+
+Y quién escucha cada evento.
+
+7. Plugins
+
+Aquí quiero pensar a futuro.
+
+Un módulo debería poder instalarse sin modificar el núcleo.
+
+Por ejemplo:
+
+Inventory
+
+CRM
+
+Payroll
+
+Manufacturing
+
+Energy
+
+Insurance
+
+Todos deberían depender del Core, pero el Core no debería depender de ellos.
+
+8. IA
+
+Este punto me parece especialmente importante para Numera.
+
+Definiríamos qué puede y qué no puede hacer la IA.
+
+Por ejemplo:
+
+Puede:
+
+clasificar documentos
+sugerir asientos
+responder preguntas
+generar informes
+buscar información
+
+No puede:
+
+modificar un asiento
+aprobar una compra
+borrar un proveedor
+
+Siempre actuará como un asistente; la decisión final la toma un caso de uso.
+
+9. Estrategia de testing
+
+No solo unit tests.
+
+Quiero definir cuatro niveles:
+
+Domain Tests
+Business Scenario Tests
+Integration Tests
+End-to-End Tests
+
+Así cada nuevo PR sabrá exactamente dónde encaja.
+
+10. Roadmap técnico
+
+No una lista de tareas, sino la evolución de la plataforma.
+
+Algo así:
+
+Fase 1 — Core
+Shared Kernel
+Money
+Events
+Purchase
+Fase 2 — Application
+Commands
+Use Cases
+Event Publisher
+Fase 3 — Infrastructure
+SQL
+Event Bus
+Storage
+Fase 4 — Accounting
+Ledger
+Posting
+Reporting
+Fase 5 — AI Platform
+OCR
+LLM
+Copilot
+Semantic Search
