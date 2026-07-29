@@ -12,12 +12,14 @@ src/numera/api/routes/events.py
 src/numera/api/routes/health.py
 src/numera/api/routes/invoices.py
 src/numera/api/routes/journal.py
+src/numera/api/routes/products.py
 src/numera/api/routes/purchases.py
 src/numera/api/routes/suppliers.py
 src/numera/api/routes/tax.py
 src/numera/api/routes/tenancy.py
 src/numera/api/schemas/__init__.py
 src/numera/api/schemas/auth.py
+src/numera/api/schemas/products.py
 src/numera/api/schemas/tax.py
 src/numera/api/schemas/tenancy.py
 src/numera/application/__init__.py
@@ -33,6 +35,7 @@ src/numera/domain/__init__.py
 src/numera/domain/accounting_mapper.py
 src/numera/domain/cognitive_service.py
 src/numera/domain/document_service.py
+src/numera/domain/invoice_catalog_service.py
 src/numera/domain/schemas.py
 src/numera/domain/accounting/__init__.py
 src/numera/domain/accounting/models.py
@@ -106,11 +109,13 @@ tests/test_business_event_repository.py
 tests/test_chart_of_accounts.py
 tests/test_cognitive.py
 tests/test_health.py
+tests/test_invoice_auto_catalog.py
 tests/test_invoice_number_extraction.py
 tests/test_journal_repository.py
 tests/test_ledger_engine.py
 tests/test_master_data_engine.py
 tests/test_money.py
+tests/test_product_master_api.py
 tests/test_purchase.py
 tests/test_purchase_api.py
 tests/test_tenancy_api.py

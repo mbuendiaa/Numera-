@@ -15,6 +15,9 @@ from numera.api.schemas.products import (
     ProductRead,
     ProductUpdate,
     SupplierOfferRead,
+    SupplierPriceComparisonRead,
+    ProductPriceAnalysisRead,
+    PriceAlertRead,
     SupplierProductCreate,
     SupplierProductRead,
     SupplierProductUpdate,
@@ -134,6 +137,72 @@ def list_products(
     if category:
         query = query.filter(ProductORM.category == category)
     return query.order_by(ProductORM.name.asc()).all()
+
+
+
+
+def _money(value) -> Decimal | None:
+    if value is None:
+        return None
+    return Decimal(str(value))
+
+
+def _percent_change(current: Decimal, previous: Decimal) -> Decimal | None:
+    if previous == 0:
+        return None
+    return ((current - previous) / previous * Decimal("100")).quantize(Decimal("0.01"))
+
+
+@router.get("/price-alerts", response_model=list[PriceAlertRead])
+def price_alerts(
+    threshold_percent: Decimal = Query(default=Decimal("5"), ge=0),
+    direction: str = Query(default="both", pattern="^(both|increase|decrease)$"),
+    limit: int = Query(default=100, ge=1, le=500),
+    _: CompanyMembershipORM = Depends(require_company_roles(*READ_ROLES)),
+    user: UserORM = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    company_id = _active_company(user)
+    links = db.query(SupplierProductORM).filter(
+        SupplierProductORM.company_id == company_id,
+        SupplierProductORM.is_active.is_(True),
+    ).all()
+    alerts: list[PriceAlertRead] = []
+    for link in links:
+        rows = db.query(ProductPriceHistoryORM).filter(
+            ProductPriceHistoryORM.company_id == company_id,
+            ProductPriceHistoryORM.supplier_product_id == link.id,
+        ).order_by(
+            ProductPriceHistoryORM.observed_at.desc(),
+            ProductPriceHistoryORM.created_at.desc(),
+        ).limit(2).all()
+        if len(rows) < 2:
+            continue
+        latest, previous = rows[0], rows[1]
+        latest_price = _money(latest.unit_price)
+        previous_price = _money(previous.unit_price)
+        change_pct = _percent_change(latest_price, previous_price)
+        if change_pct is None or abs(change_pct) < threshold_percent:
+            continue
+        alert_direction = "increase" if change_pct > 0 else "decrease"
+        if direction != "both" and direction != alert_direction:
+            continue
+        product = db.get(ProductORM, link.product_id)
+        supplier = db.get(SupplierORM, link.supplier_id)
+        if not product or not supplier:
+            continue
+        alerts.append(PriceAlertRead(
+            product_id=product.id, product_name=product.name,
+            supplier_id=supplier.id, supplier_name=supplier.name,
+            supplier_reference=link.supplier_reference,
+            previous_price=previous_price, previous_date=previous.observed_at,
+            latest_price=latest_price, latest_date=latest.observed_at,
+            change_amount=(latest_price-previous_price).quantize(Decimal("0.000001")),
+            change_percent=change_pct, direction=alert_direction,
+            currency=latest.currency,
+        ))
+    alerts.sort(key=lambda x: abs(x.change_percent), reverse=True)
+    return alerts[:limit]
 
 
 @router.get("/{product_id}", response_model=ProductRead)
@@ -346,3 +415,102 @@ def register_price_observation(
         supplier_name=supplier.name if supplier else None,
         supplier_reference=link.supplier_reference,
     )
+
+
+@router.get("/{product_id}/price-analysis", response_model=ProductPriceAnalysisRead)
+def product_price_analysis(
+    product_id: str,
+    supplier_id: str | None = Query(default=None),
+    date_from: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    date_to: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    _: CompanyMembershipORM = Depends(require_company_roles(*READ_ROLES)),
+    user: UserORM = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    company_id = _active_company(user)
+    product = _product_or_404(db, company_id, product_id)
+    query = db.query(ProductPriceHistoryORM).filter(
+        ProductPriceHistoryORM.company_id == company_id,
+        ProductPriceHistoryORM.product_id == product_id,
+    )
+    if supplier_id:
+        query = query.filter(ProductPriceHistoryORM.supplier_id == supplier_id)
+    if date_from:
+        query = query.filter(ProductPriceHistoryORM.observed_at >= date_from)
+    if date_to:
+        query = query.filter(ProductPriceHistoryORM.observed_at <= date_to)
+    rows = query.order_by(ProductPriceHistoryORM.observed_at.asc(), ProductPriceHistoryORM.created_at.asc()).all()
+    if not rows:
+        return ProductPriceAnalysisRead(
+            product_id=product.id, product_name=product.name, currency=None, observations=0, suppliers=0,
+            first_price=None, first_price_date=None, previous_price=None, previous_price_date=None,
+            latest_price=None, latest_price_date=None, minimum_price=None, maximum_price=None,
+            average_price=None, weighted_average_price=None, change_amount=None, change_percent=None,
+            trend="insufficient_data",
+        )
+    prices=[_money(r.unit_price) for r in rows]
+    latest=rows[-1]; first=rows[0]; previous=rows[-2] if len(rows)>1 else None
+    avg=(sum(prices, Decimal("0"))/Decimal(len(prices))).quantize(Decimal("0.000001"))
+    weighted_rows=[r for r in rows if r.quantity is not None and _money(r.quantity)>0]
+    weighted=None
+    if weighted_rows:
+        total_qty=sum((_money(r.quantity) for r in weighted_rows), Decimal("0"))
+        weighted=(sum((_money(r.unit_price)*_money(r.quantity) for r in weighted_rows), Decimal("0"))/total_qty).quantize(Decimal("0.000001"))
+    latest_price=_money(latest.unit_price)
+    previous_price=_money(previous.unit_price) if previous else None
+    change=(latest_price-previous_price).quantize(Decimal("0.000001")) if previous_price is not None else None
+    pct=_percent_change(latest_price, previous_price) if previous_price is not None else None
+    trend="insufficient_data" if pct is None else ("up" if pct>0 else "down" if pct<0 else "stable")
+    return ProductPriceAnalysisRead(
+        product_id=product.id, product_name=product.name, currency=latest.currency,
+        observations=len(rows), suppliers=len({r.supplier_id for r in rows}),
+        first_price=_money(first.unit_price), first_price_date=first.observed_at,
+        previous_price=previous_price, previous_price_date=previous.observed_at if previous else None,
+        latest_price=latest_price, latest_price_date=latest.observed_at,
+        minimum_price=min(prices), maximum_price=max(prices), average_price=avg,
+        weighted_average_price=weighted, change_amount=change, change_percent=pct, trend=trend,
+    )
+
+
+@router.get("/{product_id}/supplier-comparison", response_model=list[SupplierPriceComparisonRead])
+def supplier_price_comparison(
+    product_id: str,
+    date_from: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    date_to: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    _: CompanyMembershipORM = Depends(require_company_roles(*READ_ROLES)),
+    user: UserORM = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    company_id=_active_company(user)
+    _product_or_404(db, company_id, product_id)
+    links=db.query(SupplierProductORM).filter(
+        SupplierProductORM.company_id==company_id, SupplierProductORM.product_id==product_id,
+        SupplierProductORM.is_active.is_(True),
+    ).all()
+    raw=[]
+    for link in links:
+        q=db.query(ProductPriceHistoryORM).filter(ProductPriceHistoryORM.supplier_product_id==link.id)
+        if date_from: q=q.filter(ProductPriceHistoryORM.observed_at>=date_from)
+        if date_to: q=q.filter(ProductPriceHistoryORM.observed_at<=date_to)
+        rows=q.order_by(ProductPriceHistoryORM.observed_at.asc(), ProductPriceHistoryORM.created_at.asc()).all()
+        if not rows: continue
+        supplier=db.get(SupplierORM, link.supplier_id)
+        prices=[_money(r.unit_price) for r in rows]
+        raw.append((link,supplier,rows,prices))
+    if not raw: return []
+    best=min(_money(rows[-1].unit_price) for _,_,rows,_ in raw)
+    result=[]
+    for link,supplier,rows,prices in raw:
+        latest=_money(rows[-1].unit_price)
+        diff=(latest-best).quantize(Decimal("0.000001"))
+        diff_pct=_percent_change(latest,best) if best else None
+        result.append(SupplierPriceComparisonRead(
+            supplier_id=supplier.id, supplier_name=supplier.name, supplier_product_id=link.id,
+            supplier_reference=link.supplier_reference, supplier_description=link.supplier_description,
+            unit=link.purchase_unit, currency=rows[-1].currency, observations=len(rows),
+            latest_price=latest, latest_price_date=rows[-1].observed_at,
+            minimum_price=min(prices), maximum_price=max(prices),
+            average_price=(sum(prices,Decimal("0"))/Decimal(len(prices))).quantize(Decimal("0.000001")),
+            difference_from_best=diff, difference_from_best_percent=diff_pct, is_best_price=(latest==best),
+        ))
+    return sorted(result,key=lambda x:x.latest_price)

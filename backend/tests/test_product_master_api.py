@@ -163,3 +163,59 @@ def test_product_routes_are_exposed_in_openapi():
         "/products/supplier-products/{supplier_product_id}/prices",
     }
     assert expected <= set(paths)
+
+
+def test_price_analysis_supplier_comparison_and_alerts():
+    headers, company_id = onboarding("analytics@numera.test")
+    supplier_one = create_supplier(company_id, "PROVEEDOR UNO, S.L.", "B11111111")
+    supplier_two = create_supplier(company_id, "PROVEEDOR DOS, S.L.", "B22222222")
+
+    product = client.post("/products/", headers=headers, json={
+        "name": "Boquerón harinado", "base_unit": "kg"
+    }).json()
+
+    link_one = client.post(f"/products/suppliers/{supplier_one['id']}", headers=headers, json={
+        "product_id": product["id"], "supplier_reference": "BOQ-1",
+        "supplier_description": "BOQUERON HARINADO", "purchase_unit": "kg"
+    }).json()
+    link_two = client.post(f"/products/suppliers/{supplier_two['id']}", headers=headers, json={
+        "product_id": product["id"], "supplier_reference": "BOQ-2",
+        "supplier_description": "BOQUERON HARINADO", "purchase_unit": "kg"
+    }).json()
+
+    for price, date in [("6.00", "2026-01-10"), ("6.60", "2026-02-10")]:
+        response = client.post(
+            f"/products/supplier-products/{link_one['id']}/prices",
+            headers=headers,
+            json={"unit_price": price, "observed_at": date, "quantity": "10", "currency": "EUR"},
+        )
+        assert response.status_code == 201
+
+    response = client.post(
+        f"/products/supplier-products/{link_two['id']}/prices",
+        headers=headers,
+        json={"unit_price": "6.20", "observed_at": "2026-02-11", "quantity": "10", "currency": "EUR"},
+    )
+    assert response.status_code == 201
+
+    analysis = client.get(f"/products/{product['id']}/price-analysis", headers=headers)
+    assert analysis.status_code == 200
+    body = analysis.json()
+    assert body["observations"] == 3
+    assert body["suppliers"] == 2
+    assert body["minimum_price"] == "6.000000"
+    assert body["maximum_price"] == "6.600000"
+    assert body["latest_price"] == "6.200000"
+
+    comparison = client.get(
+        f"/products/{product['id']}/supplier-comparison", headers=headers
+    )
+    assert comparison.status_code == 200
+    assert comparison.json()[0]["supplier_name"] == "PROVEEDOR DOS, S.L."
+    assert comparison.json()[0]["is_best_price"] is True
+
+    alerts = client.get("/products/price-alerts?threshold_percent=5", headers=headers)
+    assert alerts.status_code == 200
+    assert len(alerts.json()) == 1
+    assert alerts.json()[0]["change_percent"] == "10.00"
+    assert alerts.json()[0]["direction"] == "increase"

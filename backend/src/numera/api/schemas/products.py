@@ -163,3 +163,59 @@ class SupplierOfferRead(BaseModel):
     latest_price_date: str | None
     currency: str
     observations: int
+
+
+class SupplierPriceComparisonRead(BaseModel):
+    supplier_id: str
+    supplier_name: str
+    supplier_product_id: str
+    supplier_reference: str
+    supplier_description: str
+    unit: str
+    currency: str
+    observations: int
+    latest_price: Decimal | None
+    latest_price_date: str | None
+    minimum_price: Decimal | None
+    maximum_price: Decimal | None
+    average_price: Decimal | None
+    difference_from_best: Decimal | None
+    difference_from_best_percent: Decimal | None
+    is_best_price: bool
+
+
+class ProductPriceAnalysisRead(BaseModel):
+    product_id: str
+    product_name: str
+    currency: str | None
+    observations: int
+    suppliers: int
+    first_price: Decimal | None
+    first_price_date: str | None
+    previous_price: Decimal | None
+    previous_price_date: str | None
+    latest_price: Decimal | None
+    latest_price_date: str | None
+    minimum_price: Decimal | None
+    maximum_price: Decimal | None
+    average_price: Decimal | None
+    weighted_average_price: Decimal | None
+    change_amount: Decimal | None
+    change_percent: Decimal | None
+    trend: Literal["up", "down", "stable", "insufficient_data"]
+
+
+class PriceAlertRead(BaseModel):
+    product_id: str
+    product_name: str
+    supplier_id: str
+    supplier_name: str
+    supplier_reference: str
+    previous_price: Decimal
+    previous_date: str
+    latest_price: Decimal
+    latest_date: str
+    change_amount: Decimal
+    change_percent: Decimal
+    direction: Literal["increase", "decrease"]
+    currency: str
