@@ -39,3 +39,22 @@ TOTAL_PATTERNS = [
     re.compile(r"TOTAL\s+L[IÍ]QUIDO\s+(\d+[.,]\d{2})", re.IGNORECASE),
     re.compile(r"total[^0-9]*(\d+[.,]\d{2})", re.IGNORECASE),
 ]
+
+CUSTOMER_NUMBER_PATTERNS = [
+    re.compile(r"CLIENTE\s+(\d{2,})", re.IGNORECASE),
+    re.compile(r"(?:N[ÚU]MERO|N[ºO])\s+CLIENTE[^0-9]*(\d{2,})", re.IGNORECASE),
+]
+
+DUE_DATE_PATTERNS = [
+    re.compile(r"(?:VENCIMIENTO|VTO\.?)\s*[:\-]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})", re.IGNORECASE),
+    re.compile(r"FORMA\s+DE\s+PAGO[\s\S]{0,120}?(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})", re.IGNORECASE),
+]
+
+PAYMENT_METHOD_PATTERNS = [
+    re.compile(r"FORMA\s+DE\s+PAGO\s+([A-ZÁÉÍÓÚÜÑ ]{3,40})", re.IGNORECASE),
+]
+
+VAT_RATE_PATTERNS = [
+    re.compile(r"BASES\s+IVA\s+%?\s*IVA\s+CUOTA\s+IVA\s+\d+[.,]\d{2}\s+(\d+[.,]\d{2})", re.IGNORECASE),
+    re.compile(r"(?:IVA|VAT)\s*(\d{1,2}(?:[.,]\d{1,2})?)\s*%", re.IGNORECASE),
+]

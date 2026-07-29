@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from numera.domain.accounting_mapper import AccountingEventMapper
 from numera.domain.schemas import InvoiceCreate
+from numera.domain.invoice_catalog_service import InvoiceCatalogService
 from numera.engines.accounting.engine import AccountingEngine
 from numera.engines.business_events import (
     DocumentUploaded,
@@ -40,6 +41,7 @@ class DocumentService:
         self.pipeline = DocumentPipeline()
         self.accounting_mapper = AccountingEventMapper()
         self.accounting_engine = AccountingEngine(ChartOfAccountsEngine(AccountRepository(db)))
+        self.invoice_catalog = InvoiceCatalogService(db)
 
     def _publish(self, event):
         self.event_store.append(event)
@@ -69,6 +71,7 @@ class DocumentService:
 
         created_invoice = None
         proposed_journal_entry = None
+        catalog_items = []
 
         if result["document_type"] == "invoice":
             created_invoice = self._try_create_invoice(
@@ -91,6 +94,15 @@ class DocumentService:
                 )
 
                 supplier_name = self._field_value(result["extracted_fields"], "supplier_name")
+                supplier = self.master_data.resolve_supplier(company_id, supplier_name)
+                catalog_items = self.invoice_catalog.process(
+                    company_id=company_id,
+                    supplier=supplier,
+                    invoice=created_invoice,
+                    document_id=document.id,
+                    fields=result["extracted_fields"],
+                )
+                result["catalog_items"] = catalog_items
                 accounting_event = self.accounting_mapper.from_purchase_invoice(
                     created_invoice,
                     supplier_name=supplier_name,

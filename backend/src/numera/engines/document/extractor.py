@@ -1,3 +1,4 @@
+import re
 from numera.engines.document import patterns
 from numera.engines.document.models import ExtractedField, InvoiceExtraction
 
@@ -43,6 +44,12 @@ class InvoiceExtractor:
             result.supplier_tax_id = ExtractedField(value=tax_id, confidence=0.80, source="regex:tax_id")
             explanation.append("Tax ID extracted with regex.")
 
+
+        customer_number = self._extract_customer_number(lines, normalized)
+        if customer_number:
+            result.customer_number = ExtractedField(value=customer_number, confidence=0.92, source="regex:customer_number")
+            explanation.append("Customer number extracted from invoice header.")
+
         invoice_number = self._extract_invoice_number(normalized)
         if invoice_number:
             result.invoice_number = ExtractedField(value=invoice_number, confidence=0.93, source="candidate_scoring:invoice_number")
@@ -53,10 +60,28 @@ class InvoiceExtractor:
             result.invoice_date = ExtractedField(value=date, confidence=0.85, source="regex:invoice_date")
             explanation.append("Invoice date extracted with regex.")
 
+
+        due_date = _first_match(patterns.DUE_DATE_PATTERNS, normalized)
+        if due_date:
+            result.due_date = ExtractedField(value=due_date, confidence=0.82, source="regex:due_date")
+            explanation.append("Payment due date extracted.")
+
+        payment_method = _first_match(patterns.PAYMENT_METHOD_PATTERNS, normalized)
+        if payment_method:
+            payment_method = payment_method.strip().splitlines()[0].strip()
+            result.payment_method = ExtractedField(value=payment_method, confidence=0.80, source="regex:payment_method")
+            explanation.append("Payment method extracted.")
+
         base = _to_float(_first_match(patterns.BASE_PATTERNS, normalized))
         if base is not None:
             result.base_amount = ExtractedField(value=base, confidence=0.88, source="regex:base_amount")
             explanation.append("Base amount extracted with invoice totals regex.")
+
+
+        vat_rate = _to_float(_first_match(patterns.VAT_RATE_PATTERNS, normalized))
+        if vat_rate is not None:
+            result.vat_rate = ExtractedField(value=vat_rate, confidence=0.90, source="regex:vat_rate")
+            explanation.append("VAT rate extracted.")
 
         tax = _to_float(_first_match(patterns.TAX_PATTERNS, normalized))
         if tax is not None:
@@ -69,10 +94,33 @@ class InvoiceExtractor:
             result.currency = ExtractedField(value="EUR", confidence=0.80, source="heuristic:spanish_invoice_currency")
             explanation.append("Total amount extracted from TOTAL LIQUIDO.")
 
+
+        line_items = self._extract_line_items(lines, normalized)
+        if line_items:
+            result.line_items = ExtractedField(value=line_items, confidence=0.86, source="regex:invoice_lines")
+            explanation.append(f"{len(line_items)} invoice line item(s) extracted.")
+
         result.global_confidence = self._confidence(result)
         if not explanation:
             explanation.append("No invoice fields extracted.")
         return result.model_dump(exclude_none=True), explanation
+
+
+    def _extract_customer_number(self, lines: list[str], text: str) -> str | None:
+        direct = _first_match(patterns.CUSTOMER_NUMBER_PATTERNS, text)
+        # Reject dates accidentally captured after a standalone CLIENTE label.
+        if direct and len(direct) >= 3:
+            return direct
+        header = lines[:10]
+        for index, line in enumerate(header):
+            if line.upper().startswith("FACTURA"):
+                for candidate in reversed(header[:index]):
+                    if re.fullmatch(r"\d{3,10}", candidate):
+                        return candidate
+        for candidate in header:
+            if re.fullmatch(r"\d{3,10}", candidate):
+                return candidate
+        return direct
 
     def _extract_invoice_number(self, text: str) -> str | None:
         candidates = []
@@ -137,6 +185,43 @@ class InvoiceExtractor:
             if len(clean) >= 3 and not any(token in lower for token in ["factura", "cliente", "fecha", "hoja"]):
                 return clean
         return None
+
+
+    def _extract_line_items(self, lines: list[str], text: str) -> list[dict]:
+        items = []
+        # Common Spanish wholesale invoice row: reference, description, boxes, quantity, price, amount.
+        row_re = re.compile(
+            r"^(?P<reference>\d{4,})\s+(?P<description>.+?)\s+(?P<boxes>\d+(?:[.,]\d+)?)\s+"
+            r"(?P<quantity>\d+(?:[.,]\d+)?)\s+(?P<unit_price>\d+(?:[.,]\d+)?)\s+"
+            r"(?P<amount>\d+(?:[.,]\d{2}))$"
+        )
+        for line in lines:
+            match = row_re.match(line)
+            if not match:
+                continue
+            data = match.groupdict()
+            items.append({
+                "supplier_reference": data["reference"],
+                "description": data["description"].strip(),
+                "package_quantity": _to_float(data["boxes"]),
+                "quantity": _to_float(data["quantity"]),
+                "unit_price": _to_float(data["unit_price"]),
+                "net_amount": _to_float(data["amount"]),
+                "purchase_unit": "kg",
+                "package_unit": "box",
+                "lot_number": self._nearby_value(text, data["reference"], r"Lote\s*([A-Z0-9\-]+)"),
+                "delivery_note_number": self._first_group(text, r"Alb:\s*([A-Z0-9\/\-]+)"),
+            })
+        return items
+
+    def _first_group(self, text: str, pattern: str) -> str | None:
+        match = re.search(pattern, text, re.IGNORECASE)
+        return match.group(1).strip() if match else None
+
+    def _nearby_value(self, text: str, anchor: str, pattern: str) -> str | None:
+        position = text.find(anchor)
+        fragment = text[position:position + 400] if position >= 0 else text
+        return self._first_group(fragment, pattern)
 
     def _confidence(self, result: InvoiceExtraction) -> float:
         fields = [

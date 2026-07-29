@@ -115,6 +115,7 @@ class DocumentUploadResponse(BaseModel):
     extracted_fields: dict
     created_invoice: InvoiceRead | None = None
     proposed_journal_entry: JournalEntryRead | None = None
+    catalog_items: list[dict] = []
 
 
 class AccountCreate(BaseModel):
