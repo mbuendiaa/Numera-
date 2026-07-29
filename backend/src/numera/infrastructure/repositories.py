@@ -104,6 +104,17 @@ class InvoiceRepository:
     def list(self):
         return self.db.query(InvoiceORM).order_by(InvoiceORM.created_at.desc()).all()
 
+    def find_duplicate(self, company_id: str, supplier_id: str | None, invoice_number: str):
+        query = self.db.query(InvoiceORM).filter(
+            InvoiceORM.company_id == company_id,
+            InvoiceORM.invoice_number == invoice_number,
+        )
+        if supplier_id is None:
+            query = query.filter(InvoiceORM.supplier_id.is_(None))
+        else:
+            query = query.filter(InvoiceORM.supplier_id == supplier_id)
+        return query.order_by(InvoiceORM.created_at.desc()).first()
+
 
 class BusinessEventRepository:
     def __init__(self, db: Session):
@@ -196,6 +207,9 @@ class DocumentRepository:
 
     def list(self):
         return self.db.query(DocumentORM).order_by(DocumentORM.created_at.desc()).all()
+
+    def get(self, document_id: str):
+        return self.db.query(DocumentORM).filter(DocumentORM.id == document_id).first()
 
 
 class JournalRepository:

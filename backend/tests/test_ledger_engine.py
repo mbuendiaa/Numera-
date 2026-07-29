@@ -53,6 +53,7 @@ def test_ledger_filters_by_date_status_and_account():
     ledger = _ledger()
     first, _ = ledger.record(_entry("doc_1", "21/04/2026"))
     ledger.record(_entry("doc_2", "05/05/2026"))
+    ledger.approve(first.id)
     ledger.post(first.id)
 
     entries = ledger.list(
@@ -70,6 +71,7 @@ def test_ledger_filters_by_date_status_and_account():
 def test_posted_entry_cannot_be_rejected():
     ledger = _ledger()
     entry, _ = ledger.record(_entry())
+    ledger.approve(entry.id)
     ledger.post(entry.id)
 
     with pytest.raises(ValueError, match="cannot be rejected"):

@@ -50,6 +50,25 @@ class DocumentService:
     def upload_and_process(self, *, company_id: str, file):
         result = self.pipeline.run(company_id=company_id, file=file)
 
+        if result["document_type"] == "invoice":
+            fields = result["extracted_fields"]
+            supplier_name = self._field_value(fields, "supplier_name")
+            supplier = self.master_data.resolve_supplier(company_id, supplier_name)
+            invoice_number = self._field_value(fields, "invoice_number")
+            if invoice_number:
+                duplicate = self.invoices.find_duplicate(
+                    company_id, supplier.id if supplier else None, str(invoice_number)
+                )
+                if duplicate:
+                    existing_document = self.documents.get(duplicate.source_document_id) if duplicate.source_document_id else None
+                    existing_journal = self.ledger.repository.find_by_document(duplicate.source_document_id) if duplicate.source_document_id else None
+                    if existing_document:
+                        result["duplicate"] = True
+                        result["message"] = "Invoice already imported. No new records were created."
+                        result["existing_invoice_id"] = duplicate.id
+                        result["existing_journal_id"] = existing_journal.id if existing_journal else None
+                        return existing_document, result, duplicate, existing_journal
+
         document = self.documents.create(
             company_id=company_id,
             filename=file.filename,

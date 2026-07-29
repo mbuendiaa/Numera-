@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 from numera.api.dependencies import get_active_membership, require_company_roles
 from numera.api.schemas.accounting import (
     AccountLedgerRead,
+    AccountingStatisticsRead,
     JournalSummaryRead,
     LedgerMovementRead,
     ManualJournalEntryCreate,
@@ -17,7 +18,7 @@ from numera.domain.accounting.models import AccountingEventType, JournalEntry, J
 from numera.domain.schemas import JournalEntryRead
 from numera.engines.ledger.engine import LedgerEngine, parse_ledger_date
 from numera.infrastructure.database.session import get_db
-from numera.infrastructure.persistence.models import AccountORM, JournalEntryORM, JournalLineORM
+from numera.infrastructure.persistence.models import AccountORM, InvoiceORM, JournalEntryORM, JournalLineORM, ProductORM, SupplierORM
 from numera.infrastructure.repositories import JournalRepository
 
 router = APIRouter()
@@ -222,4 +223,61 @@ def journal_summary(
         company_id=company_id,
         proposed=counts["proposed"], approved=counts["approved"], posted=counts["posted"], rejected=counts["rejected"],
         total_entries=len(entries), posted_debit=round(posted_debit, 2), posted_credit=round(posted_credit, 2),
+    )
+
+
+@router.get("/journal", response_model=list[JournalEntryRead])
+def list_accounting_journal(
+    entry_status: JournalEntryStatus | None = Query(default=None, alias="status"),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    account_code: str | None = Query(default=None),
+    membership=Depends(get_active_membership),
+    db: Session = Depends(get_db),
+):
+    try:
+        entries = LedgerEngine(JournalRepository(db)).list(
+            __import__("numera.engines.ledger.engine", fromlist=["LedgerQuery"]).LedgerQuery(
+                company_id=membership.company_id,
+                status=entry_status,
+                date_from=date_from,
+                date_to=date_to,
+                account_code=account_code,
+            )
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return [journal_entry_to_read(entry) for entry in entries]
+
+
+@router.get("/journal/{journal_id}", response_model=JournalEntryRead)
+def get_accounting_journal(
+    journal_id: str,
+    membership=Depends(get_active_membership),
+    db: Session = Depends(get_db),
+):
+    entry = JournalRepository(db).get(journal_id)
+    if entry is None or entry.company_id != membership.company_id:
+        raise HTTPException(status_code=404, detail="Journal entry not found")
+    return journal_entry_to_read(entry)
+
+
+@router.get("/statistics", response_model=AccountingStatisticsRead)
+def accounting_statistics(
+    membership=Depends(get_active_membership),
+    db: Session = Depends(get_db),
+):
+    company_id = membership.company_id
+    entries = db.query(JournalEntryORM).filter(JournalEntryORM.company_id == company_id).all()
+    counts = {value: 0 for value in ("proposed", "approved", "posted", "rejected")}
+    for entry in entries:
+        counts[entry.status] = counts.get(entry.status, 0) + 1
+    purchase_volume = sum(float(row.total_amount) for row in db.query(InvoiceORM).filter(InvoiceORM.company_id == company_id).all())
+    return AccountingStatisticsRead(
+        company_id=company_id,
+        journal_entries=len(entries),
+        proposed=counts["proposed"], approved=counts["approved"], posted=counts["posted"], rejected=counts["rejected"],
+        suppliers=db.query(SupplierORM).filter(SupplierORM.company_id == company_id).count(),
+        products=db.query(ProductORM).filter(ProductORM.company_id == company_id).count(),
+        purchase_volume=round(purchase_volume, 2),
     )

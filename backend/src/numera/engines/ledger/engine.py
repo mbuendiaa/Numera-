@@ -45,20 +45,26 @@ class LedgerEngine:
 
     def post(self, entry_id: str):
         entry = self._required_entry(entry_id)
-        if entry.status == JournalEntryStatus.REJECTED.value:
-            raise ValueError("A rejected journal entry cannot be posted.")
+        if entry.status == JournalEntryStatus.POSTED.value:
+            raise ValueError("Journal entry is already posted.")
+        if entry.status != JournalEntryStatus.APPROVED.value:
+            raise ValueError("Only approved journal entries can be posted.")
         if not entry.is_balanced:
             raise ValueError("An unbalanced journal entry cannot be posted.")
         return self.repository.update_status(entry_id, JournalEntryStatus.POSTED.value)
 
     def approve(self, entry_id: str):
         entry = self._required_entry(entry_id)
-        if entry.status == JournalEntryStatus.REJECTED.value:
-            raise ValueError("A rejected journal entry cannot be approved.")
+        if entry.status == JournalEntryStatus.APPROVED.value:
+            raise ValueError("Journal entry is already approved.")
+        if entry.status != JournalEntryStatus.PROPOSED.value:
+            raise ValueError("Only proposed journal entries can be approved.")
         return self.repository.update_status(entry_id, JournalEntryStatus.APPROVED.value)
 
     def reject(self, entry_id: str):
         entry = self._required_entry(entry_id)
+        if entry.status == JournalEntryStatus.REJECTED.value:
+            raise ValueError("Journal entry is already rejected.")
         if entry.status == JournalEntryStatus.POSTED.value:
             raise ValueError("A posted journal entry cannot be rejected.")
         return self.repository.update_status(entry_id, JournalEntryStatus.REJECTED.value)

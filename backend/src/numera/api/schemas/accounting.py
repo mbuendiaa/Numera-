@@ -73,3 +73,15 @@ class JournalSummaryRead(BaseModel):
     total_entries: int
     posted_debit: float
     posted_credit: float
+
+
+class AccountingStatisticsRead(BaseModel):
+    company_id: str
+    journal_entries: int
+    proposed: int
+    approved: int
+    posted: int
+    rejected: int
+    suppliers: int
+    products: int
+    purchase_volume: float

@@ -19,7 +19,7 @@ from numera.api.routes import (
 )
 from numera.infrastructure.database.session import create_database
 
-app = FastAPI(title="Numera Core Platform", version="1.1.0")
+app = FastAPI(title="Numera Core Platform", version="1.1.1")
 
 
 @app.on_event("startup")

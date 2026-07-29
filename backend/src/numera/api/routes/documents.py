@@ -20,16 +20,20 @@ router = APIRouter()
 @router.post("/upload", response_model=DocumentUploadResponse)
 def upload_document(
     file: UploadFile = File(...),
-    _: CompanyMembershipORM = Depends(require_company_roles("owner", "admin", "accountant", "manager", "employee")),
+    membership: CompanyMembershipORM = Depends(require_company_roles("owner", "admin", "accountant", "manager", "employee")),
     user: UserORM = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     document, result, created_invoice, proposed_entry = DocumentService(db).upload_and_process(
-        company_id=user.company_id,
+        company_id=membership.company_id,
         file=file,
     )
 
     return DocumentUploadResponse(
+        duplicate=bool(result.get("duplicate", False)),
+        message=result.get("message"),
+        existing_invoice_id=result.get("existing_invoice_id"),
+        existing_journal_id=result.get("existing_journal_id"),
         document=DocumentRead.model_validate(document),
         pipeline_status="completed",
         detected_type=result["document_type"],

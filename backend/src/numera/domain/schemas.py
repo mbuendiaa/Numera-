@@ -108,6 +108,10 @@ class JournalEntryRead(BaseModel):
 
 
 class DocumentUploadResponse(BaseModel):
+    duplicate: bool = False
+    message: str | None = None
+    existing_invoice_id: str | None = None
+    existing_journal_id: str | None = None
     document: DocumentRead
     pipeline_status: str
     detected_type: str
