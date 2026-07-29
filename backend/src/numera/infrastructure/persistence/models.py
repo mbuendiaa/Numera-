@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from numera.infrastructure.database.base import Base
@@ -219,3 +219,82 @@ class JournalLineORM(Base):
     credit: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
 
     entry: Mapped[JournalEntryORM] = relationship(back_populates="lines")
+
+class TaxRateORM(Base):
+    __tablename__ = "tax_rates"
+    __table_args__ = (UniqueConstraint("company_id", "code", name="uq_tax_company_code"),)
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("tax"))
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
+    code: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    rate: Mapped[float] = mapped_column(Numeric(7, 4), nullable=False, default=0)
+    surcharge_rate: Mapped[float] = mapped_column(Numeric(7, 4), nullable=False, default=0)
+    scope: Mapped[str] = mapped_column(String, nullable=False, default="domestic")
+    kind: Mapped[str] = mapped_column(String, nullable=False, default="vat")
+    deductible_percent: Mapped[float] = mapped_column(Numeric(7, 4), nullable=False, default=100)
+    is_exempt: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    reverse_charge: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class TaxDocumentORM(Base):
+    __tablename__ = "tax_documents"
+    __table_args__ = (UniqueConstraint("company_id", "document_type", "number", name="uq_tax_document_number"),)
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("taxdoc"))
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
+    document_type: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    number: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    counterparty_name: Mapped[str] = mapped_column(String, nullable=False)
+    counterparty_tax_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    issue_date: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    due_date: Mapped[str | None] = mapped_column(String, nullable=True)
+    currency: Mapped[str] = mapped_column(String, nullable=False, default="EUR")
+    status: Mapped[str] = mapped_column(String, nullable=False, default="draft")
+    subtotal: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    discount_total: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    tax_total: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    surcharge_total: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    total: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    source_document_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class TaxDocumentLineORM(Base):
+    __tablename__ = "tax_document_lines"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("taxline"))
+    document_id: Mapped[str] = mapped_column(ForeignKey("tax_documents.id", ondelete="CASCADE"), nullable=False, index=True)
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    quantity: Mapped[float] = mapped_column(Numeric(16, 4), nullable=False)
+    unit_price: Mapped[float] = mapped_column(Numeric(16, 4), nullable=False)
+    discount_percent: Mapped[float] = mapped_column(Numeric(7, 4), nullable=False, default=0)
+    tax_rate_id: Mapped[str] = mapped_column(ForeignKey("tax_rates.id"), nullable=False, index=True)
+    account_code: Mapped[str | None] = mapped_column(String, nullable=True)
+    base_amount: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False)
+    tax_amount: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False)
+    surcharge_amount: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    total_amount: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False)
+
+
+class VATSettlementORM(Base):
+    __tablename__ = "vat_settlements"
+    __table_args__ = (UniqueConstraint("company_id", "period_start", "period_end", name="uq_vat_period"),)
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("vatset"))
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
+    period_start: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    period_end: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    output_base: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    output_vat: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    input_base: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    input_vat: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    deductible_input_vat: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    vat_due: Mapped[float] = mapped_column(Numeric(16, 2), nullable=False, default=0)
+    status: Mapped[str] = mapped_column(String, nullable=False, default="draft")
+    created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)

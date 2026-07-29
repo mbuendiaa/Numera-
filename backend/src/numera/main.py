@@ -12,6 +12,7 @@ from numera.api.routes import (
     journal,
     purchases,
     suppliers,
+    tax,
     tenancy,
 )
 from numera.infrastructure.database.session import create_database
@@ -37,3 +38,4 @@ app.include_router(journal.router, prefix="/journal", tags=["Journal"])
 app.include_router(events.router, prefix="/events", tags=["Business Events"])
 
 app.include_router(purchases.router, prefix="/purchases", tags=["Purchases"])
+app.include_router(tax.router, prefix="/tax", tags=["Tax & VAT"])

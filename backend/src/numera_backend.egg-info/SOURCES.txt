@@ -14,9 +14,11 @@ src/numera/api/routes/invoices.py
 src/numera/api/routes/journal.py
 src/numera/api/routes/purchases.py
 src/numera/api/routes/suppliers.py
+src/numera/api/routes/tax.py
 src/numera/api/routes/tenancy.py
 src/numera/api/schemas/__init__.py
 src/numera/api/schemas/auth.py
+src/numera/api/schemas/tax.py
 src/numera/api/schemas/tenancy.py
 src/numera/application/__init__.py
 src/numera/application/purchase/__init__.py
