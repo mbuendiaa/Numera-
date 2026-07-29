@@ -1,8 +1,10 @@
 pyproject.toml
 src/numera/__init__.py
 src/numera/main.py
+src/numera/api/dependencies.py
 src/numera/api/serializers.py
 src/numera/api/routes/accounts.py
+src/numera/api/routes/auth.py
 src/numera/api/routes/cognitive.py
 src/numera/api/routes/companies.py
 src/numera/api/routes/documents.py
@@ -12,6 +14,8 @@ src/numera/api/routes/invoices.py
 src/numera/api/routes/journal.py
 src/numera/api/routes/purchases.py
 src/numera/api/routes/suppliers.py
+src/numera/api/schemas/__init__.py
+src/numera/api/schemas/auth.py
 src/numera/application/__init__.py
 src/numera/application/purchase/__init__.py
 src/numera/application/purchase/commands.py
@@ -81,6 +85,9 @@ src/numera/infrastructure/persistence/in_memory/__init__.py
 src/numera/infrastructure/persistence/in_memory/purchase_repository.py
 src/numera/infrastructure/wiring/__init__.py
 src/numera/infrastructure/wiring/container.py
+src/numera/security/__init__.py
+src/numera/security/passwords.py
+src/numera/security/tokens.py
 src/numera_backend.egg-info/PKG-INFO
 src/numera_backend.egg-info/SOURCES.txt
 src/numera_backend.egg-info/dependency_links.txt
@@ -89,6 +96,7 @@ src/numera_backend.egg-info/top_level.txt
 tests/test_accounting_domain.py
 tests/test_accounting_engine.py
 tests/test_accounting_mapper.py
+tests/test_auth_api.py
 tests/test_business_event_engine.py
 tests/test_business_event_repository.py
 tests/test_chart_of_accounts.py

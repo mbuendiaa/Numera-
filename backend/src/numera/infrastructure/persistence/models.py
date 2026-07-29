@@ -25,6 +25,32 @@ class CompanyORM(Base):
     accounts: Mapped[list["AccountORM"]] = relationship(back_populates="company", cascade="all, delete-orphan")
 
 
+class CompanyMembershipORM(Base):
+    __tablename__ = "company_memberships"
+    __table_args__ = (UniqueConstraint("user_id", "company_id", name="uq_membership_user_company"),)
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("membership"))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
+    role: Mapped[str] = mapped_column(String, default="readonly", nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    created_by: Mapped[str | None] = mapped_column(String, nullable=True)
+
+
+class AuditLogORM(Base):
+    __tablename__ = "audit_logs"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("audit"))
+    company_id: Mapped[str | None] = mapped_column(ForeignKey("companies.id"), nullable=True, index=True)
+    user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    action: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    entity_type: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    entity_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    details_json: Mapped[str] = mapped_column(Text, default="{}", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
 class UserORM(Base):
     __tablename__ = "users"
 

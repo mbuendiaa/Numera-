@@ -17,7 +17,7 @@ from numera.api.schemas.auth import (
 )
 from numera.core.config import settings
 from numera.infrastructure.database.session import get_db
-from numera.infrastructure.persistence.models import AuthTokenORM, CompanyORM, UserORM
+from numera.infrastructure.persistence.models import AuthTokenORM, CompanyMembershipORM, CompanyORM, UserORM
 from numera.security.passwords import hash_password, verify_password
 from numera.security.tokens import (
     TokenError,
@@ -70,6 +70,25 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
         role=payload.role.value,
     )
     db.add(user)
+    db.flush()
+    if payload.company_id:
+        # Backward-compatible bootstrap: registration may join a company only when it has no members yet.
+        existing_members = db.query(CompanyMembershipORM).filter(
+            CompanyMembershipORM.company_id == payload.company_id
+        ).count()
+        if existing_members:
+            db.rollback()
+            raise HTTPException(
+                status_code=403,
+                detail="Registration cannot self-assign access to an existing company",
+            )
+        db.add(CompanyMembershipORM(
+            user_id=user.id,
+            company_id=payload.company_id,
+            role="owner",
+            created_by=user.id,
+        ))
+        user.role = "owner"
     db.commit()
     db.refresh(user)
     return user
