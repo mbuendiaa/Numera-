@@ -3,6 +3,7 @@ src/numera/__init__.py
 src/numera/main.py
 src/numera/api/dependencies.py
 src/numera/api/serializers.py
+src/numera/api/routes/accounting.py
 src/numera/api/routes/accounts.py
 src/numera/api/routes/auth.py
 src/numera/api/routes/cognitive.py
@@ -18,6 +19,7 @@ src/numera/api/routes/suppliers.py
 src/numera/api/routes/tax.py
 src/numera/api/routes/tenancy.py
 src/numera/api/schemas/__init__.py
+src/numera/api/schemas/accounting.py
 src/numera/api/schemas/auth.py
 src/numera/api/schemas/products.py
 src/numera/api/schemas/tax.py
