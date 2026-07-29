@@ -25,6 +25,30 @@ class CompanyORM(Base):
     accounts: Mapped[list["AccountORM"]] = relationship(back_populates="company", cascade="all, delete-orphan")
 
 
+class UserORM(Base):
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("user"))
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
+    password_hash: Mapped[str] = mapped_column(String, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    company_id: Mapped[str | None] = mapped_column(ForeignKey("companies.id"), nullable=True, index=True)
+    role: Mapped[str] = mapped_column(String, default="owner", nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class AuthTokenORM(Base):
+    __tablename__ = "auth_tokens"
+
+    jti: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    token_type: Mapped[str] = mapped_column(String, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    revoked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 class AccountORM(Base):
     __tablename__ = "accounts"
     __table_args__ = (UniqueConstraint("company_id", "code", name="uq_account_company_code"),)

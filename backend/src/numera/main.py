@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from numera.api.routes import (
     accounts,
+    auth,
     cognitive,
     companies,
     documents,
@@ -23,6 +24,8 @@ def startup():
 
 
 app.include_router(health.router, tags=["Health"])
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(auth.users_router, prefix="/users", tags=["Users"])
 app.include_router(companies.router, prefix="/companies", tags=["Companies"])
 app.include_router(suppliers.router, prefix="/suppliers", tags=["Suppliers"])
 app.include_router(accounts.router, prefix="/accounts", tags=["Chart of Accounts"])

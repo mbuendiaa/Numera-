@@ -10,6 +10,7 @@ src/numera/api/routes/events.py
 src/numera/api/routes/health.py
 src/numera/api/routes/invoices.py
 src/numera/api/routes/journal.py
+src/numera/api/routes/purchases.py
 src/numera/api/routes/suppliers.py
 src/numera/application/__init__.py
 src/numera/application/purchase/__init__.py
@@ -99,3 +100,4 @@ tests/test_ledger_engine.py
 tests/test_master_data_engine.py
 tests/test_money.py
 tests/test_purchase.py
+tests/test_purchase_api.py
