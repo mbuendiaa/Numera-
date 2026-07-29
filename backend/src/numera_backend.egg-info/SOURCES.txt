@@ -11,6 +11,7 @@ src/numera/api/routes/companies.py
 src/numera/api/routes/documents.py
 src/numera/api/routes/events.py
 src/numera/api/routes/health.py
+src/numera/api/routes/intelligence.py
 src/numera/api/routes/invoices.py
 src/numera/api/routes/journal.py
 src/numera/api/routes/products.py
@@ -21,6 +22,7 @@ src/numera/api/routes/tenancy.py
 src/numera/api/schemas/__init__.py
 src/numera/api/schemas/accounting.py
 src/numera/api/schemas/auth.py
+src/numera/api/schemas/intelligence.py
 src/numera/api/schemas/products.py
 src/numera/api/schemas/tax.py
 src/numera/api/schemas/tenancy.py
@@ -97,6 +99,7 @@ src/numera/infrastructure/wiring/container.py
 src/numera/security/__init__.py
 src/numera/security/passwords.py
 src/numera/security/tokens.py
+src/numera/services/accounting_intelligence.py
 src/numera_backend.egg-info/PKG-INFO
 src/numera_backend.egg-info/SOURCES.txt
 src/numera_backend.egg-info/dependency_links.txt
