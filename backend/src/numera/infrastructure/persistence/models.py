@@ -298,3 +298,91 @@ class VATSettlementORM(Base):
     status: Mapped[str] = mapped_column(String, nullable=False, default="draft")
     created_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ProductORM(Base):
+    __tablename__ = "products"
+    __table_args__ = (
+        UniqueConstraint("company_id", "normalized_name", name="uq_product_company_name"),
+        UniqueConstraint("company_id", "internal_sku", name="uq_product_company_sku"),
+    )
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("product"))
+    company_id: Mapped[str] = mapped_column(
+        ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
+    normalized_name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
+    category: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    base_unit: Mapped[str] = mapped_column(String(20), nullable=False, default="unit")
+    default_vat_rate: Mapped[float | None] = mapped_column(Numeric(7, 4), nullable=True)
+    internal_sku: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+
+class SupplierProductORM(Base):
+    __tablename__ = "supplier_products"
+    __table_args__ = (
+        UniqueConstraint("company_id", "supplier_id", "supplier_reference", name="uq_supplier_reference"),
+        UniqueConstraint("supplier_id", "product_id", name="uq_supplier_product_link"),
+    )
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("supplier_product"))
+    company_id: Mapped[str] = mapped_column(
+        ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    supplier_id: Mapped[str] = mapped_column(
+        ForeignKey("suppliers.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    product_id: Mapped[str] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    supplier_reference: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    supplier_description: Mapped[str] = mapped_column(String(300), nullable=False)
+    purchase_unit: Mapped[str] = mapped_column(String(20), nullable=False, default="unit")
+    package_unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    units_per_package: Mapped[float | None] = mapped_column(Numeric(16, 4), nullable=True)
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="EUR")
+    default_vat_rate: Mapped[float | None] = mapped_column(Numeric(7, 4), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+
+class ProductPriceHistoryORM(Base):
+    __tablename__ = "product_price_history"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: new_id("price"))
+    company_id: Mapped[str] = mapped_column(
+        ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    supplier_product_id: Mapped[str] = mapped_column(
+        ForeignKey("supplier_products.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    product_id: Mapped[str] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    supplier_id: Mapped[str] = mapped_column(
+        ForeignKey("suppliers.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    unit_price: Mapped[float] = mapped_column(Numeric(16, 6), nullable=False)
+    observed_at: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    quantity: Mapped[float | None] = mapped_column(Numeric(16, 4), nullable=True)
+    package_quantity: Mapped[float | None] = mapped_column(Numeric(16, 4), nullable=True)
+    net_amount: Mapped[float | None] = mapped_column(Numeric(16, 2), nullable=True)
+    vat_rate: Mapped[float | None] = mapped_column(Numeric(7, 4), nullable=True)
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="EUR")
+    invoice_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    invoice_number: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    source_document_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    lot_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    delivery_note_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)

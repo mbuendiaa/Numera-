@@ -11,6 +11,7 @@ from numera.api.routes import (
     invoices,
     journal,
     purchases,
+    products,
     suppliers,
     tax,
     tenancy,
@@ -30,6 +31,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(auth.users_router, prefix="/users", tags=["Users"])
 app.include_router(tenancy.router, prefix="/companies", tags=["Companies & Access"])
 app.include_router(suppliers.router, prefix="/suppliers", tags=["Suppliers"])
+app.include_router(products.router, prefix="/products", tags=["Products & Supplier Catalog"])
 app.include_router(accounts.router, prefix="/accounts", tags=["Chart of Accounts"])
 app.include_router(invoices.router, prefix="/invoices", tags=["Invoices"])
 app.include_router(cognitive.router, prefix="/cognitive", tags=["Cognitive System"])
