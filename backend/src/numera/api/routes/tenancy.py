@@ -17,6 +17,8 @@ from numera.api.schemas.tenancy import (
 )
 from numera.domain.schemas import CompanyCreate, CompanyRead
 from numera.infrastructure.database.session import get_db
+from numera.engines.chart_of_accounts.engine import ChartOfAccountsEngine
+from numera.infrastructure.repositories import AccountRepository
 from numera.infrastructure.persistence.models import (
     AuditLogORM,
     CompanyMembershipORM,
@@ -67,6 +69,9 @@ def create_company(
     # company, with no separate activation step required.
     user.company_id = company.id
     user.role = "owner"
+    # Every company starts with an operational Spanish PGC subset so invoice
+    # proposals can be validated and posted immediately.
+    ChartOfAccountsEngine(AccountRepository(db)).seed_defaults(company.id)
     _audit(db, user_id=user.id, company_id=company.id, action="company.created",
            entity_type="company", entity_id=company.id)
     db.commit()

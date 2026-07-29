@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from numera.api.routes import (
+    accounting,
     accounts,
     auth,
     cognitive,
@@ -18,7 +19,7 @@ from numera.api.routes import (
 )
 from numera.infrastructure.database.session import create_database
 
-app = FastAPI(title="Numera Core Platform", version="1.0.0")
+app = FastAPI(title="Numera Core Platform", version="1.1.0")
 
 
 @app.on_event("startup")
@@ -33,6 +34,7 @@ app.include_router(tenancy.router, prefix="/companies", tags=["Companies & Acces
 app.include_router(suppliers.router, prefix="/suppliers", tags=["Suppliers"])
 app.include_router(products.router, prefix="/products", tags=["Products & Supplier Catalog"])
 app.include_router(accounts.router, prefix="/accounts", tags=["Chart of Accounts"])
+app.include_router(accounting.router, prefix="/accounting", tags=["Accounting Engine"])
 app.include_router(invoices.router, prefix="/invoices", tags=["Invoices"])
 app.include_router(cognitive.router, prefix="/cognitive", tags=["Cognitive System"])
 app.include_router(documents.router, prefix="/documents", tags=["Documents"])
