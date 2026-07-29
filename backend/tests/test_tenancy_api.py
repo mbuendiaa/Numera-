@@ -28,8 +28,8 @@ def register_and_login(email: str):
         "email": email, "password": "StrongPass123!", "name": email.split("@")[0]
     })
     assert response.status_code == 201
-    tokens = client.post("/auth/login", data={
-        "username": email, "password": "StrongPass123!"
+    tokens = client.post("/auth/login", json={
+        "email": email, "password": "StrongPass123!"
     }).json()
     return {"Authorization": f"Bearer {tokens['access_token']}"}
 
@@ -79,3 +79,34 @@ def test_tenancy_endpoints_are_in_openapi():
     assert "/companies/{company_id}/activate" in schema["paths"]
     assert "/companies/{company_id}/members" in schema["paths"]
     assert "/companies/{company_id}/audit" in schema["paths"]
+
+
+def test_register_then_create_company_completes_onboarding():
+    headers = register_and_login("new-owner@tenant.test")
+
+    before = client.get("/auth/me", headers=headers)
+    assert before.status_code == 200
+    assert before.json()["company_id"] is None
+    assert before.json()["role"] == "readonly"
+
+    created = client.post("/companies/", headers=headers, json={
+        "name": "First Company", "tax_id": "B12345678", "country": "ES", "currency": "EUR"
+    })
+    assert created.status_code == 201
+
+    after = client.get("/auth/me", headers=headers)
+    assert after.status_code == 200
+    assert after.json()["company_id"] == created.json()["id"]
+    assert after.json()["role"] == "owner"
+
+    mine = client.get("/companies/my", headers=headers)
+    assert mine.status_code == 200
+    assert mine.json() == [{
+        "id": created.json()["id"],
+        "name": "First Company",
+        "country": "ES",
+        "currency": "EUR",
+        "role": "owner",
+        "is_active": True,
+        "selected": True,
+    }]

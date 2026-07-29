@@ -25,7 +25,6 @@ def register_user(email="owner@numera.test"):
             "email": email,
             "password": "StrongPass123!",
             "name": "Numera Owner",
-            "role": "owner",
         },
     )
 
@@ -33,7 +32,7 @@ def register_user(email="owner@numera.test"):
 def login_user(email="owner@numera.test"):
     return client.post(
         "/auth/login",
-        data={"username": email, "password": "StrongPass123!"},
+        json={"email": email, "password": "StrongPass123!"},
     )
 
 
@@ -56,7 +55,7 @@ def test_register_login_me_refresh_and_logout():
     headers = {"Authorization": f"Bearer {tokens['access_token']}"}
     me = client.get("/auth/me", headers=headers)
     assert me.status_code == 200
-    assert me.json()["role"] == "owner"
+    assert me.json()["role"] == "readonly"
 
     updated = client.patch("/users/me", headers=headers, json={"name": "Updated Owner"})
     assert updated.status_code == 200
@@ -85,7 +84,7 @@ def test_bad_password_is_rejected():
     register_user()
     response = client.post(
         "/auth/login",
-        data={"username": "owner@numera.test", "password": "wrong-password"},
+        json={"email": "owner@numera.test", "password": "wrong-password"},
     )
     assert response.status_code == 401
 
@@ -101,4 +100,8 @@ def test_authentication_is_exposed_in_openapi():
         "/users/me",
     ]:
         assert path in schema["paths"]
-    assert "OAuth2PasswordBearer" in schema["components"]["securitySchemes"]
+    assert "HTTPBearer" in schema["components"]["securitySchemes"]
+    login_schema = schema["components"]["schemas"]["LoginRequest"]
+    assert set(login_schema["properties"]) == {"email", "password"}
+    register_schema = schema["components"]["schemas"]["UserRegister"]
+    assert set(register_schema["properties"]) == {"email", "password", "name"}

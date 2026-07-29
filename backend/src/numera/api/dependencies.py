@@ -1,7 +1,7 @@
 from collections.abc import Callable
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from numera.infrastructure.database.session import get_db
@@ -9,11 +9,11 @@ from numera.infrastructure.persistence.models import AuthTokenORM, UserORM
 from numera.security.tokens import TokenError, decode_token
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ) -> UserORM:
     credentials_error = HTTPException(
@@ -21,8 +21,11 @@ def get_current_user(
         detail="Invalid or expired authentication credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        raise credentials_error
+
     try:
-        payload = decode_token(token, "access")
+        payload = decode_token(credentials.credentials, "access")
     except TokenError as exc:
         raise credentials_error from exc
 

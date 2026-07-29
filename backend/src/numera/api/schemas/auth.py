@@ -14,11 +14,16 @@ class UserRole(str, Enum):
 
 
 class UserRegister(BaseModel):
+    """Public signup payload.
+
+    Company membership and roles are intentionally not accepted here. A new
+    user registers first and then creates a company or is invited by an owner.
+    This prevents users from granting themselves access to an existing tenant.
+    """
+
     email: str
     password: str = Field(min_length=8, max_length=128)
     name: str = Field(min_length=1, max_length=120)
-    company_id: str | None = None
-    role: UserRole = UserRole.owner
 
     @field_validator("email")
     @classmethod
@@ -44,6 +49,19 @@ class UserRead(BaseModel):
 class UserUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
     password: str | None = Field(default=None, min_length=8, max_length=128)
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str = Field(min_length=1, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def validate_login_email(cls, value: str) -> str:
+        value = value.strip().lower()
+        if "@" not in value or value.startswith("@") or value.endswith("@"): 
+            raise ValueError("Invalid email address")
+        return value
 
 
 class TokenPair(BaseModel):

@@ -62,9 +62,11 @@ def create_company(
         role="owner",
         created_by=user.id,
     ))
-    if user.company_id is None:
-        user.company_id = company.id
-        user.role = "owner"
+    # A newly created company becomes active immediately. This makes the
+    # onboarding flow atomic: create company -> owner membership -> active
+    # company, with no separate activation step required.
+    user.company_id = company.id
+    user.role = "owner"
     _audit(db, user_id=user.id, company_id=company.id, action="company.created",
            entity_type="company", entity_id=company.id)
     db.commit()

@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from numera.api.dependencies import get_current_user, oauth2_scheme
+from numera.api.dependencies import bearer_scheme, get_current_user
 from numera.api.schemas.auth import (
+    LoginRequest,
     LogoutRequest,
     Message,
     RefreshRequest,
@@ -17,7 +17,7 @@ from numera.api.schemas.auth import (
 )
 from numera.core.config import settings
 from numera.infrastructure.database.session import get_db
-from numera.infrastructure.persistence.models import AuthTokenORM, CompanyMembershipORM, CompanyORM, UserORM
+from numera.infrastructure.persistence.models import AuthTokenORM, UserORM
 from numera.security.passwords import hash_password, verify_password
 from numera.security.tokens import (
     TokenError,
@@ -59,49 +59,37 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
     existing = db.scalar(select(UserORM).where(UserORM.email == email))
     if existing:
         raise HTTPException(status_code=409, detail="A user with this email already exists")
-    if payload.company_id and db.get(CompanyORM, payload.company_id) is None:
-        raise HTTPException(status_code=404, detail="Company not found")
-
     user = UserORM(
         email=email,
         password_hash=hash_password(payload.password),
         name=payload.name.strip(),
-        company_id=payload.company_id,
-        role=payload.role.value,
+        company_id=None,
+        # The effective role is assigned through a company membership. Until
+        # onboarding is completed, the user has no tenant privileges.
+        role="readonly",
     )
     db.add(user)
-    db.flush()
-    if payload.company_id:
-        # Backward-compatible bootstrap: registration may join a company only when it has no members yet.
-        existing_members = db.query(CompanyMembershipORM).filter(
-            CompanyMembershipORM.company_id == payload.company_id
-        ).count()
-        if existing_members:
-            db.rollback()
-            raise HTTPException(
-                status_code=403,
-                detail="Registration cannot self-assign access to an existing company",
-            )
-        db.add(CompanyMembershipORM(
-            user_id=user.id,
-            company_id=payload.company_id,
-            role="owner",
-            created_by=user.id,
-        ))
-        user.role = "owner"
     db.commit()
     db.refresh(user)
     return user
 
 
-@router.post("/login", response_model=TokenPair)
+@router.post(
+    "/login",
+    response_model=TokenPair,
+    summary="Login with email and password",
+    description=(
+        "Enter only the account email and password. The response contains the "
+        "access token to paste into Swagger's Authorize dialog."
+    ),
+)
 def login(
-    form: OAuth2PasswordRequestForm = Depends(),
+    payload: LoginRequest,
     db: Session = Depends(get_db),
 ):
-    email = form.username.lower().strip()
+    email = payload.email.lower().strip()
     user = db.scalar(select(UserORM).where(UserORM.email == email))
-    if user is None or not verify_password(form.password, user.password_hash):
+    if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(
             status_code=401,
             detail="Incorrect email or password",
@@ -136,11 +124,13 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)):
 @router.post("/logout", response_model=Message)
 def logout(
     payload: LogoutRequest,
-    token: str = Depends(oauth2_scheme),
+    credentials=Depends(bearer_scheme),
     user: UserORM = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    access_claims = decode_token(token, "access")
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    access_claims = decode_token(credentials.credentials, "access")
     db.merge(
         AuthTokenORM(
             jti=access_claims["jti"],
