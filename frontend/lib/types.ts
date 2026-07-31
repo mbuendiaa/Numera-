@@ -150,3 +150,23 @@ export type SupplierProduct = {
   latest_price: number | null;
   latest_price_date: string | null;
 };
+
+export type ReviewItem = {
+  id: string;
+  item_type: "document" | "invoice" | "journal" | string;
+  reason: string;
+  confidence: number | null;
+  status: string;
+  created_at: string | null;
+  reference: string | null;
+};
+
+export type ReviewCenter = {
+  company_id: string;
+  total_pending: number;
+  low_confidence: number;
+  ocr_errors: number;
+  accounting_errors: number;
+  duplicate_candidates: number;
+  items: ReviewItem[];
+};
