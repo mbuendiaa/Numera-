@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from numera.api.routes import (
     accounting,
@@ -19,22 +20,17 @@ from numera.api.routes import (
     tenancy,
 )
 from numera.infrastructure.database.session import create_database
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Numera Core Platform", version="1.2.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=["http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.on_event("startup")
 def startup():

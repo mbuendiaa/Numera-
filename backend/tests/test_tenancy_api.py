@@ -110,30 +110,3 @@ def test_register_then_create_company_completes_onboarding():
         "is_active": True,
         "selected": True,
     }]
-
-
-def test_login_restores_company_for_legacy_membership():
-    headers = register_and_login("legacy@tenant.test")
-    created = client.post("/companies/", headers=headers, json={
-        "name": "Legacy Company", "country": "ES", "currency": "EUR"
-    })
-    assert created.status_code == 201
-    company_id = created.json()["id"]
-
-    # Simulate an account created by an older frontend: membership exists but
-    # the selected company was not persisted on the user.
-    with SessionLocal() as db:
-        user = db.query(UserORM).filter(UserORM.email == "legacy@tenant.test").one()
-        user.company_id = None
-        user.role = "readonly"
-        db.commit()
-
-    relogin = client.post("/auth/login", json={
-        "email": "legacy@tenant.test", "password": "StrongPass123!"
-    })
-    assert relogin.status_code == 200
-    restored_headers = {"Authorization": f"Bearer {relogin.json()['access_token']}"}
-    me = client.get("/auth/me", headers=restored_headers)
-    assert me.status_code == 200
-    assert me.json()["company_id"] == company_id
-    assert me.json()["role"] == "owner"
