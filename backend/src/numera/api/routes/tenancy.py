@@ -11,12 +11,14 @@ from numera.api.schemas.tenancy import (
     AuditLogRead,
     CompanyWithRole,
     MemberAdd,
+    CompanyUserCreate,
     MemberRead,
     MembershipRead,
     MemberRoleUpdate,
 )
 from numera.domain.schemas import CompanyCreate, CompanyRead
 from numera.infrastructure.database.session import get_db
+from numera.security.passwords import hash_password
 from numera.engines.chart_of_accounts.engine import ChartOfAccountsEngine
 from numera.infrastructure.repositories import AccountRepository
 from numera.infrastructure.persistence.models import (
@@ -178,6 +180,78 @@ def add_member(
     db.commit()
     db.refresh(membership)
     return membership
+
+
+@router.post("/{company_id}/users", response_model=MemberRead, status_code=status.HTTP_201_CREATED)
+def create_company_user(
+    company_id: str,
+    payload: CompanyUserCreate,
+    _: CompanyMembershipORM = Depends(require_company_roles("owner", "admin")),
+    actor: UserORM = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Create a user and attach it to the active company in one operation.
+
+    Owners no longer need to ask an employee to register first or manually
+    associate the account afterwards. Existing users are simply attached.
+    """
+    if actor.company_id != company_id:
+        raise HTTPException(status_code=409, detail="Select this company as active first")
+
+    target = db.scalar(select(UserORM).where(UserORM.email == payload.email))
+    if target is None:
+        target = UserORM(
+            email=payload.email,
+            password_hash=hash_password(payload.temporary_password),
+            name=payload.name.strip(),
+            company_id=company_id,
+            role=payload.role.value,
+            is_active=True,
+        )
+        db.add(target)
+        db.flush()
+    else:
+        existing = db.scalar(select(CompanyMembershipORM).where(
+            CompanyMembershipORM.user_id == target.id,
+            CompanyMembershipORM.company_id == company_id,
+        ))
+        if existing and existing.is_active:
+            raise HTTPException(status_code=409, detail="User is already a company member")
+        if existing:
+            existing.is_active = True
+            existing.role = payload.role.value
+            membership = existing
+        else:
+            membership = CompanyMembershipORM(
+                user_id=target.id, company_id=company_id, role=payload.role.value, created_by=actor.id
+            )
+            db.add(membership)
+        if target.company_id is None:
+            target.company_id = company_id
+            target.role = payload.role.value
+        _audit(db, user_id=actor.id, company_id=company_id, action="user.attached",
+               entity_type="membership", details={"target_user_id": target.id, "role": payload.role.value})
+        db.commit()
+        db.refresh(membership)
+        return MemberRead(
+            id=membership.id, user_id=membership.user_id, company_id=membership.company_id,
+            role=membership.role, is_active=membership.is_active, created_at=membership.created_at,
+            created_by=membership.created_by, email=target.email, name=target.name,
+        )
+
+    membership = CompanyMembershipORM(
+        user_id=target.id, company_id=company_id, role=payload.role.value, created_by=actor.id
+    )
+    db.add(membership)
+    _audit(db, user_id=actor.id, company_id=company_id, action="user.created",
+           entity_type="user", entity_id=target.id, details={"email": target.email, "role": payload.role.value})
+    db.commit()
+    db.refresh(membership)
+    return MemberRead(
+        id=membership.id, user_id=membership.user_id, company_id=membership.company_id,
+        role=membership.role, is_active=membership.is_active, created_at=membership.created_at,
+        created_by=membership.created_by, email=target.email, name=target.name,
+    )
 
 
 @router.patch("/{company_id}/members/{user_id}", response_model=MembershipRead)

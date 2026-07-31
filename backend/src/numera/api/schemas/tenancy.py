@@ -45,6 +45,21 @@ class MemberAdd(BaseModel):
         return value
 
 
+class CompanyUserCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    email: str
+    temporary_password: str = Field(min_length=8, max_length=128)
+    role: UserRole = UserRole.readonly
+
+    @field_validator("email")
+    @classmethod
+    def normalize_company_user_email(cls, value: str) -> str:
+        value = value.strip().lower()
+        if "@" not in value:
+            raise ValueError("Invalid email address")
+        return value
+
+
 class MemberRoleUpdate(BaseModel):
     role: UserRole
 
