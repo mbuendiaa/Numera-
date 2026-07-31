@@ -1,4 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { SuppliersClient } from "@/components/suppliers-client";
+
 export default function SuppliersPage() {
-  return <PlaceholderPage title="Proveedores" description="Consulta proveedores, facturas, compras y evolución de precios." />;
+  return <SuppliersClient />;
 }

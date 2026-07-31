@@ -108,3 +108,45 @@ export type UploadResponse = {
   proposed_journal_entry: JournalEntry | null;
   catalog_items: Array<Record<string, unknown>>;
 };
+
+export type Supplier = {
+  id: string;
+  company_id: string;
+  name: string;
+  tax_id: string | null;
+  country: string;
+  default_account: string | null;
+};
+
+export type SupplierAnalytics = {
+  supplier_id: string;
+  supplier_name: string;
+  invoice_count: number;
+  total_purchased: number;
+  average_invoice: number;
+  products_supplied: number;
+  latest_invoice_date: string | null;
+  latest_purchase_price: number | null;
+};
+
+export type SupplierProduct = {
+  id: string;
+  company_id: string;
+  supplier_id: string;
+  product_id: string;
+  supplier_reference: string;
+  supplier_description: string;
+  purchase_unit: string;
+  package_unit: string | null;
+  units_per_package: number | null;
+  currency: string;
+  default_vat_rate: number | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  supplier_name: string | null;
+  product_name: string | null;
+  latest_price: number | null;
+  latest_price_date: string | null;
+};
