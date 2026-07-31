@@ -17,7 +17,7 @@ from numera.api.schemas.auth import (
 )
 from numera.core.config import settings
 from numera.infrastructure.database.session import get_db
-from numera.infrastructure.persistence.models import AuthTokenORM, UserORM
+from numera.infrastructure.persistence.models import AuthTokenORM, CompanyMembershipORM, UserORM
 from numera.security.passwords import hash_password, verify_password
 from numera.security.tokens import (
     TokenError,
@@ -28,6 +28,32 @@ from numera.security.tokens import (
 
 router = APIRouter()
 users_router = APIRouter()
+
+
+def _restore_active_company(db: Session, user: UserORM) -> None:
+    """Restore a valid active company for legacy or partially onboarded users.
+
+    Older frontend versions could create a membership without persisting the
+    selected company on the user. When there is exactly one (or a most recent)
+    active membership, select it automatically so protected endpoints work
+    without requiring a manual activation call.
+    """
+    if user.company_id:
+        return
+    membership = db.scalar(
+        select(CompanyMembershipORM)
+        .where(
+            CompanyMembershipORM.user_id == user.id,
+            CompanyMembershipORM.is_active.is_(True),
+        )
+        .order_by(CompanyMembershipORM.created_at.desc())
+    )
+    if membership is None:
+        return
+    user.company_id = membership.company_id
+    user.role = membership.role
+    db.commit()
+    db.refresh(user)
 
 
 def _store_refresh_token(db: Session, user_id: str, jti: str) -> None:
@@ -97,6 +123,7 @@ def login(
         )
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Inactive user")
+    _restore_active_company(db, user)
     return _token_pair(db, user.id)
 
 
@@ -155,7 +182,11 @@ def logout(
 
 
 @router.get("/me", response_model=UserRead)
-def me(user: UserORM = Depends(get_current_user)):
+def me(
+    user: UserORM = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _restore_active_company(db, user)
     return user
 
 
