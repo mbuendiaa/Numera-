@@ -8,9 +8,9 @@ import { apiFetch } from "@/lib/api";
 import type { Supplier, SupplierAnalytics, User } from "@/lib/types";
 import { BackendError } from "@/components/backend-error";
 import { MetricCard } from "@/components/metric-card";
+import { formatDate } from "@/lib/format";
 
 const money = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
-const date = new Intl.DateTimeFormat("es-ES");
 
 type SupplierRow = { supplier: Supplier; analytics: SupplierAnalytics };
 
@@ -128,7 +128,7 @@ export function SuppliersClient() {
                       <td className="py-4 font-medium">{money.format(analytics.total_purchased)}</td>
                       <td className="py-4">{money.format(analytics.average_invoice)}</td>
                       <td className="py-4">{analytics.products_supplied}</td>
-                      <td className="py-4">{analytics.latest_invoice_date ? date.format(new Date(`${analytics.latest_invoice_date}T00:00:00`)) : "—"}</td>
+                      <td className="py-4">{formatDate(analytics.latest_invoice_date)}</td>
                       <td className="py-4 text-right">
                         <Link href={`/suppliers/${supplier.id}`} className="inline-flex items-center gap-1 font-medium text-primary">
                           Ver ficha <ChevronRight size={16} />
