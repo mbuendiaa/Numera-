@@ -170,3 +170,67 @@ export type ReviewCenter = {
   duplicate_candidates: number;
   items: ReviewItem[];
 };
+
+export type JournalSummary = {
+  company_id: string;
+  proposed: number;
+  approved: number;
+  posted: number;
+  rejected: number;
+  total_entries: number;
+  posted_debit: number;
+  posted_credit: number;
+};
+
+export type TrialBalanceLine = {
+  account_code: string;
+  account_name: string;
+  category: string;
+  total_debit: number;
+  total_credit: number;
+  balance: number;
+};
+
+export type TrialBalance = {
+  company_id: string;
+  date_from: string | null;
+  date_to: string | null;
+  status: string;
+  lines: TrialBalanceLine[];
+  total_debit: number;
+  total_credit: number;
+  is_balanced: boolean;
+};
+
+export type LedgerMovement = {
+  journal_entry_id: string;
+  entry_date: string;
+  entry_description: string;
+  line_description: string;
+  debit: number;
+  credit: number;
+  running_balance: number;
+};
+
+export type AccountLedger = {
+  company_id: string;
+  account_code: string;
+  account_name: string;
+  normal_balance: string;
+  opening_balance: number;
+  total_debit: number;
+  total_credit: number;
+  closing_balance: number;
+  movements: LedgerMovement[];
+};
+
+export type ManualJournalEntryPayload = {
+  entry_date: string;
+  description: string;
+  lines: Array<{
+    account_code: string;
+    description: string;
+    debit: number;
+    credit: number;
+  }>;
+};
