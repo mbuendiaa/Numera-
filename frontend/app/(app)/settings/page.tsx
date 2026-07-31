@@ -1,4 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { SettingsAdminClient } from "@/components/settings-admin-client";
+
 export default function SettingsPage() {
-  return <PlaceholderPage title="Configuración" description="Empresa, usuarios, API y preferencias de Numera." />;
+  return <SettingsAdminClient />;
 }

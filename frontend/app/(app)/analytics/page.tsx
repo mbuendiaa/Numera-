@@ -1,4 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { AnalyticsIntelligenceClient } from "@/components/analytics-intelligence-client";
+
 export default function AnalyticsPage() {
-  return <PlaceholderPage title="Analytics" description="Indicadores de compras, proveedores, productos y contabilidad." />;
+  return <AnalyticsIntelligenceClient />;
 }

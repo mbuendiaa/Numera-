@@ -234,3 +234,60 @@ export type ManualJournalEntryPayload = {
     credit: number;
   }>;
 };
+
+export type AccountingStatistics = {
+  company_id: string;
+  journal_entries: number;
+  proposed: number;
+  approved: number;
+  posted: number;
+  rejected: number;
+  suppliers: number;
+  products: number;
+  purchase_volume: number;
+};
+
+export type PriceAlert = {
+  product_id: string;
+  product_name: string;
+  supplier_id: string;
+  supplier_name: string;
+  supplier_reference: string;
+  previous_price: number;
+  previous_date: string;
+  latest_price: number;
+  latest_date: string;
+  change_amount: number;
+  change_percent: number;
+  direction: "increase" | "decrease";
+  currency: string;
+};
+
+export type CompanyWithRole = Company & {
+  role: User["role"];
+  is_active: boolean;
+  selected: boolean;
+};
+
+export type CompanyMember = {
+  id: string;
+  user_id: string;
+  company_id: string;
+  role: User["role"];
+  is_active: boolean;
+  created_at: string;
+  created_by: string | null;
+  email: string;
+  name: string;
+};
+
+export type AuditLog = {
+  id: string;
+  user_id: string;
+  company_id: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  details_json: string;
+  created_at: string;
+};
