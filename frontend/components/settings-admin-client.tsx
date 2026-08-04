@@ -92,9 +92,7 @@ export function SettingsAdminClient() {
   const { theme, setTheme } = useTheme();
   const [tab, setTab] = useState<Tab>("company");
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
-  const [invitePassword, setInvitePassword] = useState("");
   const [inviteRole, setInviteRole] = useState<Role>("accountant");
   const [notice, setNotice] = useState<string | null>(null);
   const [accounting, setAccounting] = useState(accountingDefaults);
@@ -132,10 +130,10 @@ export function SettingsAdminClient() {
   });
 
   const addMember = useMutation({
-    mutationFn: () => apiFetch(`/companies/${companyId}/users`, { method: "POST", body: JSON.stringify({ name: inviteName, email: inviteEmail, temporary_password: invitePassword, role: inviteRole }) }),
+    mutationFn: () => apiFetch(`/companies/${companyId}/members`, { method: "POST", body: JSON.stringify({ email: inviteEmail, role: inviteRole }) }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["company-members", companyId] });
-      setInviteName(""); setInviteEmail(""); setInvitePassword(""); setInviteRole("accountant"); setInviteOpen(false); setNotice("Usuario creado y vinculado automáticamente a la empresa.");
+      setInviteEmail(""); setInviteRole("accountant"); setInviteOpen(false); setNotice("Usuario añadido correctamente.");
     }
   });
 
@@ -204,7 +202,7 @@ export function SettingsAdminClient() {
 
       {tab === "users" && <SectionCard title="Usuarios y permisos" description="Gestiona quién puede acceder a la empresa y qué puede hacer." icon={UserCog}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-sm text-slate-500">{members.data?.length ?? 0} usuarios vinculados</p></div>{canManageUsers && <button onClick={() => setInviteOpen((value) => !value)} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"><Plus size={16}/>Añadir usuario</button>}</div>
-        {inviteOpen && <form onSubmit={(event: FormEvent) => { event.preventDefault(); addMember.mutate(); }} className="mt-5 grid gap-3 rounded-2xl border bg-muted/20 p-4 md:grid-cols-2"><input required className={inputClass} placeholder="Nombre y apellidos" value={inviteName} onChange={(e) => setInviteName(e.target.value)} /><input required type="email" className={inputClass} placeholder="usuario@empresa.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} /><input required minLength={8} type="password" className={inputClass} placeholder="Contraseña temporal (mín. 8)" value={invitePassword} onChange={(e) => setInvitePassword(e.target.value)} /><select className={inputClass} value={inviteRole} onChange={(e) => setInviteRole(e.target.value as Role)}>{ROLES.filter((r) => r !== "owner").map((role) => <option key={role} value={role}>{roleLabels[role]}</option>)}</select><div className="md:col-span-2 flex items-center justify-between gap-4"><p className="text-xs text-slate-500">La cuenta se crea ya vinculada a <strong>{activeCompany?.name}</strong>. El usuario solo tendrá que iniciar sesión.</p><button disabled={addMember.isPending} className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">{addMember.isPending ? "Creando..." : "Crear usuario"}</button></div>{addMember.error instanceof Error && <p className="md:col-span-2 text-sm text-rose-600">{addMember.error.message}</p>}</form>}
+        {inviteOpen && <form onSubmit={(event: FormEvent) => { event.preventDefault(); addMember.mutate(); }} className="mt-5 grid gap-3 rounded-2xl border bg-muted/20 p-4 md:grid-cols-[1fr_220px_auto]"><input required type="email" className={inputClass} placeholder="usuario@empresa.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} /><select className={inputClass} value={inviteRole} onChange={(e) => setInviteRole(e.target.value as Role)}>{ROLES.filter((r) => r !== "owner").map((role) => <option key={role} value={role}>{roleLabels[role]}</option>)}</select><button disabled={addMember.isPending} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">{addMember.isPending ? "Añadiendo..." : "Añadir"}</button><p className="md:col-span-3 text-xs text-slate-500">El usuario debe haberse registrado previamente en Numera.</p>{addMember.error instanceof Error && <p className="md:col-span-3 text-sm text-rose-600">{addMember.error.message}</p>}</form>}
         <div className="mt-6 overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="text-slate-500"><tr className="border-b"><th className="pb-3">Usuario</th><th className="pb-3">Rol</th><th className="pb-3">Estado</th><th className="pb-3 text-right">Acciones</th></tr></thead><tbody>{members.data?.map((member) => <tr key={member.id} className="border-b last:border-0"><td className="py-4"><p className="font-medium">{member.name}</p><p className="text-slate-500">{member.email}</p></td><td className="py-4">{canManageUsers ? <select className="rounded-lg border bg-background px-3 py-2" value={member.role} disabled={updateRole.isPending} onChange={(e) => updateRole.mutate({ userId: member.user_id, role: e.target.value as Role })}>{ROLES.map((role) => <option key={role} value={role}>{roleLabels[role]}</option>)}</select> : roleLabels[member.role as Role] ?? member.role}</td><td className="py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${member.is_active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>{member.is_active ? "Activo" : "Inactivo"}</span></td><td className="py-4 text-right">{canManageUsers && member.user_id !== me.data?.id && <button onClick={() => { if (window.confirm(`¿Eliminar el acceso de ${member.email}?`)) removeMember.mutate(member.user_id); }} className="inline-flex items-center gap-1 text-rose-600 hover:underline"><Trash2 size={15}/>Eliminar</button>}</td></tr>)}</tbody></table>{members.isLoading && <Loader2 className="mx-auto my-8 animate-spin text-primary"/>}{members.error instanceof Error && <p className="py-8 text-center text-sm text-rose-600">{members.error.message}</p>}</div>
       </SectionCard>}
 

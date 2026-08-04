@@ -205,6 +205,48 @@ def price_alerts(
     return alerts[:limit]
 
 
+@router.get("/catalog", response_model=list[SupplierProductRead])
+def company_product_catalog(
+    search: str | None = Query(default=None),
+    supplier_id: str | None = Query(default=None),
+    active_only: bool = Query(default=True),
+    _: CompanyMembershipORM = Depends(require_company_roles(*READ_ROLES)),
+    user: UserORM = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return the real product catalog created from invoice line items.
+
+    Each row represents the relation between a supplier reference and a Numera
+    product, enriched with the latest observed invoice price and date. No demo
+    or seeded products are returned.
+    """
+    company_id = _active_company(user)
+    query = db.query(SupplierProductORM).filter(
+        SupplierProductORM.company_id == company_id
+    )
+    if active_only:
+        query = query.filter(SupplierProductORM.is_active.is_(True))
+    if supplier_id:
+        query = query.filter(SupplierProductORM.supplier_id == supplier_id)
+    if search:
+        term = f"%{search.strip()}%"
+        query = (
+            query.join(ProductORM, ProductORM.id == SupplierProductORM.product_id)
+            .join(SupplierORM, SupplierORM.id == SupplierProductORM.supplier_id)
+            .filter(
+                (ProductORM.name.ilike(term))
+                | (SupplierProductORM.supplier_description.ilike(term))
+                | (SupplierProductORM.supplier_reference.ilike(term))
+                | (SupplierORM.name.ilike(term))
+            )
+        )
+    rows = query.order_by(
+        SupplierProductORM.updated_at.desc(),
+        SupplierProductORM.supplier_description.asc(),
+    ).all()
+    return [_supplier_product_read(db, row) for row in rows]
+
+
 @router.get("/{product_id}", response_model=ProductRead)
 def get_product(
     product_id: str,

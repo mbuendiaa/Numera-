@@ -119,7 +119,7 @@ class InvoiceCatalogService:
 
     @staticmethod
     def _iso_date(value: str) -> str:
-        match = re.match(r"(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})", str(value))
+        match = re.match(r"(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})", str(value))
         if not match:
             return str(value)[:10]
         day, month, year = match.groups()

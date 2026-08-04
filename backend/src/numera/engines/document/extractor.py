@@ -188,30 +188,128 @@ class InvoiceExtractor:
 
 
     def _extract_line_items(self, lines: list[str], text: str) -> list[dict]:
-        items = []
-        # Common Spanish wholesale invoice row: reference, description, boxes, quantity, price, amount.
-        row_re = re.compile(
+        """Extract invoice rows without creating synthetic/demo products.
+
+        Supports the Spanish wholesale layout used by SELPROMAR and a common
+        Portuguese seafood layout where quantities and prices include explicit
+        KG tokens. The catalog service only persists rows returned here.
+        """
+        items: list[dict] = []
+        seen: set[tuple[str, str, float | None]] = set()
+
+        spanish_row = re.compile(
             r"^(?P<reference>\d{4,})\s+(?P<description>.+?)\s+(?P<boxes>\d+(?:[.,]\d+)?)\s+"
             r"(?P<quantity>\d+(?:[.,]\d+)?)\s+(?P<unit_price>\d+(?:[.,]\d+)?)\s+"
             r"(?P<amount>\d+(?:[.,]\d{2}))$"
         )
+        portuguese_row = re.compile(
+            r"^(?P<reference>\d{4,})\s+(?P<description>.+?)\s+(?P<boxes>\d+)\s+"
+            r"(?P<gross_qty>\d+(?:[.,]\d+)?)\s+KG\s+"
+            r"(?P<net_qty>\d+(?:[.,]\d+)?)\s+KG\s+"
+            r"(?P<gross_price>\d+(?:[.,]\d+)?)\s+KG\s+"
+            r"(?P<net_price>\d+(?:[.,]\d+)?)\s+KG\s+"
+            r"(?P<discount>\d+(?:[.,]\d+)?)\s+"
+            r"(?P<amount>\d{1,3}(?:\.\d{3})*(?:,\d{2})|\d+(?:,\d{2}))\s+\d+(?:[.,]\d+)?$",
+            re.IGNORECASE,
+        )
+
         for line in lines:
-            match = row_re.match(line)
-            if not match:
+            match = spanish_row.match(line)
+            if match:
+                data = match.groupdict()
+                row = {
+                    "supplier_reference": data["reference"],
+                    "description": data["description"].strip(),
+                    "package_quantity": _to_float(data["boxes"]),
+                    "quantity": _to_float(data["quantity"]),
+                    "unit_price": _to_float(data["unit_price"]),
+                    "net_amount": _to_float(data["amount"]),
+                    "purchase_unit": "kg",
+                    "package_unit": "box",
+                    "lot_number": self._nearby_value(text, data["reference"], r"Lote\s*:?\s*([A-Z0-9\-]+)"),
+                    "expiry_date": self._nearby_value(text, data["reference"], r"(?:Val\.|Cad\.|Caducidad)\s*:?\s*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})"),
+                    "delivery_note_number": self._first_group(text, r"Alb:\s*([A-Z0-9/\-]+)"),
+                }
+                key = (row["supplier_reference"], row["description"], row["unit_price"])
+                if key not in seen:
+                    items.append(row)
+                    seen.add(key)
                 continue
-            data = match.groupdict()
-            items.append({
-                "supplier_reference": data["reference"],
-                "description": data["description"].strip(),
-                "package_quantity": _to_float(data["boxes"]),
-                "quantity": _to_float(data["quantity"]),
-                "unit_price": _to_float(data["unit_price"]),
-                "net_amount": _to_float(data["amount"]),
-                "purchase_unit": "kg",
-                "package_unit": "box",
-                "lot_number": self._nearby_value(text, data["reference"], r"Lote\s*([A-Z0-9\-]+)"),
-                "delivery_note_number": self._first_group(text, r"Alb:\s*([A-Z0-9\/\-]+)"),
-            })
+
+            match = portuguese_row.match(line)
+            if match:
+                data = match.groupdict()
+                # The invoiced amount is gross quantity × discounted PL/UN price.
+                row = {
+                    "supplier_reference": data["reference"],
+                    "description": data["description"].strip(),
+                    "package_quantity": _to_float(data["boxes"]),
+                    "quantity": _to_float(data["gross_qty"]),
+                    "net_quantity": _to_float(data["net_qty"]),
+                    "unit_price": _to_float(data["gross_price"]),
+                    "net_amount": _to_float(data["amount"]),
+                    "discount_percent": _to_float(data["discount"]),
+                    "purchase_unit": "kg",
+                    "package_unit": "box",
+                    "lot_number": self._nearby_value(text, data["reference"], r"Lote\s*:?\s*([A-Z0-9\-]+)"),
+                    "expiry_date": self._nearby_value(text, data["reference"], r"Val\.\s*:?\s*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})"),
+                    "delivery_note_number": self._first_group(text, r"Guia:\s*([A-Z0-9 /\-]+)"),
+                }
+                key = (row["supplier_reference"], row["description"], row["unit_price"])
+                if key not in seen:
+                    items.append(row)
+                    seen.add(key)
+
+        # Portuguese layouts often split description and numeric columns over
+        # separate PDF text lines. Join the product header with the following
+        # numeric row instead of treating either line as a separate product.
+        metrics_re = re.compile(
+            r"^(?P<boxes>\d+)\s+(?P<gross_qty>\d+(?:[.,]\d+)?)\s+KG\s+"
+            r"(?P<net_qty>\d+(?:[.,]\d+)?)\s+KG\s+"
+            r"(?P<gross_price>\d+(?:[.,]\d+)?)\s+KG\s+"
+            r"(?P<net_price>\d+(?:[.,]\d+)?)\s+KG\s+"
+            r"(?P<discount>\d+(?:[.,]\d+)?)\s+"
+            r"(?P<amount>\d{1,3}(?:\.\d{3})*(?:,\d{2})|\d+(?:,\d{2}))\s+\d+(?:[.,]\d+)?$",
+            re.IGNORECASE,
+        )
+        header_re = re.compile(r"^(?P<reference>\d{4,})\s+(?P<description>.+)$")
+        for index, line in enumerate(lines):
+            header = header_re.match(line)
+            if not header:
+                continue
+            for offset in range(1, 5):
+                if index + offset >= len(lines):
+                    break
+                metrics = metrics_re.match(lines[index + offset])
+                if not metrics:
+                    continue
+                description_parts = [header.group("description").strip()]
+                for part in lines[index + 1:index + offset]:
+                    if not re.match(r"^(?:Lote|Valor|Desc\.|Flete|Base|Total|Taxa)", part, re.IGNORECASE):
+                        description_parts.append(part.strip())
+                data = metrics.groupdict()
+                reference = header.group("reference")
+                row = {
+                    "supplier_reference": reference,
+                    "description": " ".join(description_parts).strip(),
+                    "package_quantity": _to_float(data["boxes"]),
+                    "quantity": _to_float(data["gross_qty"]),
+                    "net_quantity": _to_float(data["net_qty"]),
+                    "unit_price": _to_float(data["gross_price"]),
+                    "net_amount": _to_float(data["amount"]),
+                    "discount_percent": _to_float(data["discount"]),
+                    "purchase_unit": "kg",
+                    "package_unit": "box",
+                    "lot_number": self._nearby_value(text, reference, r"Lote\s*:?\s*([A-Z0-9\-]+)"),
+                    "expiry_date": self._nearby_value(text, reference, r"Val\.\s*:?\s*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})"),
+                    "delivery_note_number": self._first_group(text, r"Guia:\s*([A-Z0-9 /\-]+)"),
+                }
+                key = (row["supplier_reference"], row["description"], row["unit_price"])
+                if key not in seen:
+                    items.append(row)
+                    seen.add(key)
+                break
+
         return items
 
     def _first_group(self, text: str, pattern: str) -> str | None:

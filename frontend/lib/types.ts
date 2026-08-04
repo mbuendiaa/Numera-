@@ -291,3 +291,25 @@ export type AuditLog = {
   details_json: string;
   created_at: string;
 };
+
+export type ProductCatalogItem = {
+  id: string;
+  company_id: string;
+  supplier_id: string;
+  product_id: string;
+  supplier_reference: string;
+  supplier_description: string;
+  purchase_unit: string;
+  package_unit: string | null;
+  units_per_package: number | string | null;
+  currency: string;
+  default_vat_rate: number | string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  supplier_name: string | null;
+  product_name: string | null;
+  latest_price: number | string | null;
+  latest_price_date: string | null;
+};
