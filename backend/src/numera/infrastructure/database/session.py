@@ -4,10 +4,13 @@ from sqlalchemy.orm import sessionmaker
 from numera.core.config import settings
 from numera.infrastructure.database.base import Base
 
-engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False} if settings.database_url.startswith("sqlite") else {},
-)
+engine_options: dict = {
+    "pool_pre_ping": True,
+}
+if settings.is_sqlite:
+    engine_options["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(settings.database_url, **engine_options)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
